@@ -6,121 +6,127 @@ import { useLanguage } from "../context/LanguageContext";
 const TOPOLOGY_NODES = [
   {
     id: "upstream",
-    name: "APJII OpenIXP / Telko Peering",
-    roleId: "Upstream Internet Backbone & Peering",
-    roleEn: "Upstream Internet Backbone & Peering",
-    layer: "L3 / WAN Backbone",
-    ip: "202.152.0.1 / AS-Number BGP",
-    interface: "10G SFP+ MetroLink",
-    status: "ONLINE · 0% LOSS",
+    name: "Pusat Internet Data Center APJII",
+    nameEn: "APJII Data Center Internet Gateway",
+    roleId: "Jalur Utama Internet & Peering",
+    roleEn: "Main Internet Peering & Backbone",
+    subId: "Interkoneksi Backbone",
+    subEn: "Backbone Interconnection",
+    status: "NORMAL · 0% LOSS",
     color: "#00ff9d",
     x: 160,
     y: 70,
     icon: "🌐",
-    specsId: "Interkoneksi jalur transit internet dan peering OpenIXP di Data Center APJII Jakarta. Redundansi link Telkom & Indosat.",
-    specsEn: "Transit IP interconnection and OpenIXP peering at APJII Data Center Jakarta. Multi-homed Telkom & Indosat redundancy.",
-    protocols: ["BGP", "BGP Peering", "10G SFP+ LR", "OpenIXP"],
+    specsId: "Jalur transit internet utama di Gedung Data Center APJII Jakarta. Menghubungkan jaringan lokal dengan jalur penyedia internet Telkom dan Indosat.",
+    specsEn: "Primary transit internet interconnection at APJII Data Center Jakarta, establishing upstream redundancy via Telkom and Indosat feeds.",
+    featuresId: ["Pusat Data APJII", "Jalur Redundansi", "Interkoneksi Fiber 10G"],
+    featuresEn: ["APJII Data Center", "Carrier Redundancy", "10G Fiber Interconnect"],
   },
   {
     id: "core",
-    name: "MikroTik CCR2004 Core Router",
-    roleId: "Core Routing & Gateway Utama",
-    roleEn: "Core Routing & Main Gateway",
-    layer: "L3 Network Layer",
-    ip: "10.240.0.1 /24 (Gateway)",
-    interface: "sfp-sfpplus1 to 4",
-    status: "ACTIVE · 24/7 UPTIME",
+    name: "Router Utama (MikroTik)",
+    nameEn: "Core Router (MikroTik)",
+    roleId: "Pengatur Lalu Lintas Data & Firewall",
+    roleEn: "Traffic Controller & Network Firewall",
+    subId: "Pusat Kendali Jaringan",
+    subEn: "Network Control Hub",
+    status: "AKTIF · 24/7 ONLINE",
     color: "var(--teal)",
     x: 450,
     y: 70,
     icon: "⚙️",
-    specsId: "Pusat routing dinamis/statis, Firewall Filter, NAT Mangle, manajemen bandwidth QoS, dan tunnel WireGuard VPN.",
-    specsEn: "Central dynamic/static routing, Firewall Filter, NAT Mangle, QoS bandwidth traffic queues, and WireGuard VPN tunnels.",
-    protocols: ["OSPF", "BGP", "NAT / Mangle", "WireGuard", "Simple Queue"],
+    specsId: "Mengatur pembagian koneksi internet, batas kecepatan bandwidth, keamanan firewall agar tidak bisa diretas, dan jalur VPN antar kantor.",
+    specsEn: "Handles core traffic distribution, bandwidth queueing, stateful firewall protection, and secure VPN connections between remote sites.",
+    featuresId: ["Firewall & Keamanan", "Bagi Bandwidth Klien", "Koneksi VPN Aman"],
+    featuresEn: ["Firewall Security", "Bandwidth Management", "Secure VPN Tunneling"],
   },
   {
     id: "odf",
-    name: "High-Density ODF UOB & Mangkuluhur",
-    roleId: "Distribusi Kabel Fiber Optik",
-    roleEn: "High-Density Fiber Distribution",
-    layer: "L1 Physical Layer",
-    ip: "Optical Patch Panel / Passive",
-    interface: "SM SC/UPC - LC Duplex",
-    status: "NORMAL LOSS · -18.4 dBm",
+    name: "Rak Kabel Fiber ODF (UOB & Mangkuluhur)",
+    nameEn: "High-Density Fiber ODF (UOB & Mangkuluhur)",
+    roleId: "Pusat Terminasi Kabel Kaca",
+    roleEn: "Optical Cable Termination & Grooming",
+    subId: "Jalur Fisik Kabel Optik",
+    subEn: "Physical Fiber Infrastructure",
+    status: "REDAMAN NORMAL",
     color: "var(--copper)",
     x: 740,
     y: 70,
     icon: "⚡",
-    specsId: "Terminasi kabel fiber optik Single-Mode di Gedung UOB Plaza dan Hotel Mangkuluhur. Diuji menggunakan Yokogawa AQ1000 & Fusion Splicer.",
-    specsEn: "Single-Mode fiber termination at UOB Plaza and Hotel Mangkuluhur Jakarta. Tested via Yokogawa AQ1000 & Fusion Splicing.",
-    protocols: ["Single-Mode 1310/1550nm", "Fusion Splicing", "OTDR Testing", "LC/SC Patchcord"],
+    specsId: "Panel khusus tempat menghubungkan kabel serat optik antar lantai dan antar gedung. Dipasang dan diuji langsung dengan fusion splicer dan alat ukur OTDR.",
+    specsEn: "High-density distribution frame terminating fiber optic lines across floors and buildings. Validated with fusion splicing and OTDR testing.",
+    featuresId: ["Kabel Fiber Kaca", "Penyambungan Splicer", "Uji Redaman OTDR"],
+    featuresEn: ["Glass Core Fiber", "Fusion Splicing", "OTDR Quality Check"],
   },
   {
     id: "switch",
-    name: "Cisco Catalyst Distribution Switch",
-    roleId: "Enterprise Switching & Trunking",
-    roleEn: "Enterprise Switching & Trunking",
-    layer: "L2 Data Link Layer",
-    ip: "10.240.0.10 (Management)",
-    interface: "Gi1/0/1 - Gi1/0/24 (Trunk)",
-    status: "LINK 1Gbps FULL DUPLEX",
+    name: "Switch Distribusi Kantor",
+    nameEn: "Corporate Distribution Switch",
+    roleId: "Penyalur Koneksi ke Perangkat",
+    roleEn: "Floor & Device Distribution Switch",
+    subId: "Penyalur Kabel LAN & Fiber",
+    subEn: "LAN & Fiber Distribution",
+    status: "LINK 1Gbps STABIL",
     color: "#60a5fa",
     x: 300,
     y: 270,
     icon: "🔀",
-    specsId: "Pemisahan traffic antar departemen melalui 802.1Q VLAN Trunking, Spanning Tree Protocol (RSTP), dan LACP EtherChannel di rack server hotel.",
-    specsEn: "Departmental traffic isolation via 802.1Q VLAN Trunking, Rapid Spanning Tree (RSTP), and LACP EtherChannel at hotel rack.",
-    protocols: ["802.1Q VLAN", "RSTP", "LACP", "Port Security"],
+    specsId: "Membagi koneksi internet dari router ke masing-masing ruangan kantor, kamar hotel, dan server melalui kabel LAN serta kabel fiber.",
+    specsEn: "Distributes bandwidth from the core router to office departments, hotel rooms, and local servers over gigabit LAN and optical links.",
+    featuresId: ["Pemisahan Jalur Kantor", "Kecepatan 1Gbps", "Pencegah Loop Jaringan"],
+    featuresEn: ["Department Isolation", "1Gbps Line Rate", "Loop Prevention"],
   },
   {
     id: "vlan204",
-    name: "VLAN 204 Sunvone Corporate",
-    roleId: "Subnet Klien & Monitoring NOC",
-    roleEn: "Corporate Subnet & NOC Telemetry",
-    layer: "L3 / L2 Segment",
-    ip: "10.240.0.0/24 (VLAN ID 204)",
-    interface: "vlan204-sunvone",
-    status: "10.2 Mbps RATE · 0 DROPS",
+    name: "Jalur Klien & Monitoring (VLAN 204)",
+    nameEn: "Client Traffic & Telemetry (VLAN 204)",
+    roleId: "Trafik Klien yang Dipantau di Winbox",
+    roleEn: "Client Traffic Monitored via Winbox",
+    subId: "Jalur Terpantau Aktif",
+    subEn: "Active Telemetry Stream",
+    status: "10.2 Mbps · 0% DROP",
     color: "var(--teal)",
     x: 600,
     y: 270,
     icon: "📊",
-    specsId: "Jalur data korporat terpantau aktif di MikroTik Winbox. Akumulasi transfer 1097 GiB dengan rasio zero packet drop.",
-    specsEn: "Corporate data lane actively monitored on MikroTik Winbox. Total transfer 1097 GiB with zero packet drop ratio.",
-    protocols: ["VLAN 204", "MRTG", "Cacti", "SNMP v2c", "SolarWinds"],
+    specsId: "Jalur trafik nyata yang dipantau setiap hari melalui layar Winbox. Menyalurkan data pelanggan korporat dengan rekam jejak koneksi stabil tanpa putus.",
+    specsEn: "Real production client traffic lane monitored daily via MikroTik Winbox. Delivers corporate client data with zero packet loss.",
+    featuresId: ["Pantauan Grafik Winbox", "Nol Paket Putus (0 Drops)", "Koneksi Terjaga 24/7"],
+    featuresEn: ["Winbox Live Graphs", "Zero Packet Drops", "24/7 Monitored Link"],
   },
   {
     id: "iptv",
-    name: "IPTV Headend & Server Cluster",
-    roleId: "Layanan Multicast TV & Web Host",
-    roleEn: "Multicast IPTV Headend & Web Host",
-    layer: "L7 Application & Multicast",
-    ip: "239.255.0.0/16 (Multicast Pool)",
-    interface: "eth0 / igmp-proxy",
-    status: "STREAMING · PIM-SM OK",
+    name: "Server Layanan IPTV & Website",
+    nameEn: "IPTV Streaming & Web Server Cluster",
+    roleId: "Siaran TV Digital & Server Linux",
+    roleEn: "Digital TV Streaming & Linux Server",
+    subId: "Pusat Layanan Klien",
+    subEn: "Services & Application Host",
+    status: "SIARAN ONLINE",
     color: "#f59e0b",
     x: 450,
     y: 430,
     icon: "📺",
-    specsId: "Headend streaming siaran TV digital berbasis multicast IP dan Linux Server (Apache/Nginx) untuk hosting website perusahaan.",
-    specsEn: "Digital TV streaming headend powered by IP multicast and Linux Server (Apache/Nginx) for corporate web platforms.",
-    protocols: ["IGMP Snooping", "PIM-SM", "Linux Apache", "DNS / SSL", "cPanel"],
+    specsId: "Komputer server Linux yang bertugas memancarkan siaran TV digital beresolusi tinggi ke layar pelanggan serta menjalankan website perusahaan.",
+    specsEn: "Linux server environment streaming digital broadcast channels to subscribers while hosting corporate web platforms.",
+    featuresId: ["Siaran TV Digital", "Server Web Linux", "Pemeliharaan Rutin"],
+    featuresEn: ["Digital TV Broadcast", "Linux Web Server", "Routine Maintenance"],
   },
 ];
 
 const LINKS = [
-  { from: "upstream", to: "core", label: "10G MetroLink Uplink" },
-  { from: "core", to: "odf", label: "Fiber Backbone SFP" },
-  { from: "core", to: "switch", label: "802.1Q Trunk (VLANs)" },
-  { from: "odf", to: "switch", label: "ODF Patchcord Cross-connect" },
-  { from: "switch", to: "vlan204", label: "Access Port Client Subnet" },
-  { from: "core", to: "vlan204", label: "Router-on-a-Stick / SVI" },
-  { from: "core", to: "iptv", label: "Multicast PIM-SM Stream" },
-  { from: "switch", to: "iptv", label: "IPTV Headend LAN Port" },
+  { from: "upstream", to: "core" },
+  { from: "core", to: "odf" },
+  { from: "core", to: "switch" },
+  { from: "odf", to: "switch" },
+  { from: "switch", to: "vlan204" },
+  { from: "core", to: "vlan204" },
+  { from: "core", to: "iptv" },
+  { from: "switch", to: "iptv" },
 ];
 
 export default function TopologyMap() {
-  const [selectedNode, setSelectedNode] = useState(TOPOLOGY_NODES[1]); // Default MikroTik CCR
+  const [selectedNode, setSelectedNode] = useState(TOPOLOGY_NODES[1]); // Default Router Utama
   const { lang, t } = useLanguage();
   const isId = lang === "id";
 
@@ -130,12 +136,22 @@ export default function TopologyMap() {
         <p className="eyebrow">{t("topo_eyebrow")}</p>
         <div className="topology-heading">
           <div>
-            <h2 className="sectitle">{t("topo_title")}</h2>
-            <p className="section-note">{t("topo_note")}</p>
+            <h2 className="sectitle">
+              {isId ? "Alur & Arsitektur Jaringan Nyata" : "Production Network Architecture"}
+            </h2>
+            <p className="section-note">
+              {isId
+                ? "Gambaran sederhana bagaimana alur internet dari Pusat Data APJII disalurkan lewat kabel fiber optik, router MikroTik, dan switch hingga dinikmati oleh klien."
+                : "A visual overview showing how data flows from the APJII Data Center through fiber cables, MikroTik routing, and distribution switches to corporate clients."}
+            </p>
           </div>
           <div className="topology-hint-badge">
             <span className="pulse-circle" />
-            <span>{t("topo_click_hint")}</span>
+            <span>
+              {isId
+                ? "Klik salah satu ikon perangkat untuk melihat fungsi kerjanya"
+                : "Click any device icon to view its operational role"}
+            </span>
           </div>
         </div>
 
@@ -160,7 +176,7 @@ export default function TopologyMap() {
                 </filter>
               </defs>
 
-              {/* Connecting Fiber / LAN Lines */}
+              {/* Connecting Lines */}
               {LINKS.map((link, idx) => {
                 const nodeA = TOPOLOGY_NODES.find((n) => n.id === link.from);
                 const nodeB = TOPOLOGY_NODES.find((n) => n.id === link.to);
@@ -171,7 +187,6 @@ export default function TopologyMap() {
 
                 return (
                   <g key={idx} className="topology-link-group">
-                    {/* Base Line */}
                     <line
                       x1={nodeA.x}
                       y1={nodeA.y}
@@ -179,8 +194,7 @@ export default function TopologyMap() {
                       y2={nodeB.y}
                       className={`topo-line ${isLinkActive ? "is-active-link" : ""}`}
                     />
-                    {/* Animated Pulsing Packet Circle */}
-                    <circle r="3" className="topo-packet" fill="var(--teal)" filter="url(#glow)">
+                    <circle r="3.2" className="topo-packet" fill="var(--teal)" filter="url(#glow)">
                       <animateMotion
                         path={`M ${nodeA.x} ${nodeA.y} L ${nodeB.x} ${nodeB.y}`}
                         dur={`${2.2 + (idx % 3) * 0.6}s`}
@@ -191,9 +205,12 @@ export default function TopologyMap() {
                 );
               })}
 
-              {/* Node Circles */}
+              {/* Device Nodes */}
               {TOPOLOGY_NODES.map((node) => {
                 const isSelected = selectedNode?.id === node.id;
+                const nodeName = isId ? node.name : node.nameEn;
+                const nodeSub = isId ? node.subId : node.subEn;
+
                 return (
                   <g
                     key={node.id}
@@ -204,7 +221,6 @@ export default function TopologyMap() {
                     tabIndex={0}
                     onKeyDown={(e) => e.key === "Enter" && setSelectedNode(node)}
                   >
-                    {/* Outer Glow Halo when selected */}
                     {isSelected && (
                       <circle
                         r="36"
@@ -216,7 +232,6 @@ export default function TopologyMap() {
                       />
                     )}
 
-                    {/* Node Background */}
                     <circle
                       r="26"
                       className="topo-node-bg"
@@ -224,7 +239,6 @@ export default function TopologyMap() {
                       strokeWidth={isSelected ? "2.5" : "1.5"}
                     />
 
-                    {/* Node Icon */}
                     <text
                       textAnchor="middle"
                       dy="7"
@@ -234,20 +248,19 @@ export default function TopologyMap() {
                       {node.icon}
                     </text>
 
-                    {/* Node Label Text */}
                     <text
                       textAnchor="middle"
                       dy="42"
                       className="topo-node-name"
                     >
-                      {node.name.length > 22 ? node.name.slice(0, 20) + "…" : node.name}
+                      {nodeName.length > 25 ? nodeName.slice(0, 23) + "…" : nodeName}
                     </text>
                     <text
                       textAnchor="middle"
                       dy="54"
                       className="topo-node-layer"
                     >
-                      {node.layer}
+                      {nodeSub}
                     </text>
                   </g>
                 );
@@ -262,9 +275,15 @@ export default function TopologyMap() {
                 <div className="inspector-title-wrap">
                   <span className="inspector-icon">{selectedNode.icon}</span>
                   <div>
-                    <span className="inspector-layer-tag">{selectedNode.layer}</span>
-                    <h3 className="inspector-name">{selectedNode.name}</h3>
-                    <p className="inspector-role">{isId ? selectedNode.roleId : selectedNode.roleEn}</p>
+                    <span className="inspector-layer-tag">
+                      {isId ? selectedNode.subId : selectedNode.subEn}
+                    </span>
+                    <h3 className="inspector-name">
+                      {isId ? selectedNode.name : selectedNode.nameEn}
+                    </h3>
+                    <p className="inspector-role">
+                      {isId ? selectedNode.roleId : selectedNode.roleEn}
+                    </p>
                   </div>
                 </div>
                 <div className="inspector-status-badge">
@@ -273,27 +292,18 @@ export default function TopologyMap() {
                 </div>
               </div>
 
-              <div className="inspector-grid">
-                <div className="inspector-field">
-                  <span className="field-lbl">IP ADDRESS / POOL:</span>
-                  <code className="field-val text-teal">{selectedNode.ip}</code>
-                </div>
-                <div className="inspector-field">
-                  <span className="field-lbl">INTERFACE &amp; MEDIA:</span>
-                  <code className="field-val">{selectedNode.interface}</code>
-                </div>
-              </div>
-
               <p className="inspector-desc">
                 {isId ? selectedNode.specsId : selectedNode.specsEn}
               </p>
 
               <div className="inspector-protocols">
-                <span className="proto-title">ACTIVE PROTOCOLS &amp; CONFIG:</span>
+                <span className="proto-title">
+                  {isId ? "TUGAS & PENANGANAN DI LAPANGAN:" : "KEY RESPONSIBILITIES & FIELD TASKS:"}
+                </span>
                 <div className="proto-tags">
-                  {selectedNode.protocols.map((proto) => (
-                    <span key={proto} className="tag">
-                      {proto}
+                  {(isId ? selectedNode.featuresId : selectedNode.featuresEn).map((item) => (
+                    <span key={item} className="tag">
+                      ✓ {item}
                     </span>
                   ))}
                 </div>
@@ -305,4 +315,3 @@ export default function TopologyMap() {
     </section>
   );
 }
-
