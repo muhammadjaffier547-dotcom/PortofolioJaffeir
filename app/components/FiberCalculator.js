@@ -191,12 +191,17 @@ export default function FiberCalculator() {
             </div>
           </div>
 
-          <p className="result-note">
-            <i>*</i>{" "}
-            {isId
-              ? `Rumus: (${distance}km × ${attenuationRate}) + (${splices} × 0.1) + (${connectors} × 0.5)`
-              : `Formula: (${distance}km × ${attenuationRate}) + (${splices} × 0.1) + (${connectors} × 0.5)`}
-          </p>
+          <div className="fiber-formula-box">
+            <span className="formula-tag">
+              📐 {isId ? "RUMUS PERHITUNGAN KABEL (ITU-T G.652):" : "CABLE LOSS FORMULA (ITU-T G.652):"}
+            </span>
+            <code className="fiber-formula-code">
+              Total Loss = (Jarak × {attenuationRate} dB/km) + (Sambungan × 0.1 dB) + (Konektor × 0.5 dB)
+            </code>
+            <p className="fiber-formula-eval">
+              = ({distance}km × {attenuationRate}) + ({splices} × 0.1) + ({connectors} × 0.5) = <strong className="text-teal">{totalLoss} dB</strong>
+            </p>
+          </div>
         </div>
       </div>
     </div>
