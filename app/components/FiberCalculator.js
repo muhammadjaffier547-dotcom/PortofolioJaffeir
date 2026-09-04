@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import OtdrWaveform from "./OtdrWaveform";
 
 export default function FiberCalculator() {
   const [distance, setDistance] = useState(5);
@@ -204,6 +205,15 @@ export default function FiberCalculator() {
           </div>
         </div>
       </div>
+
+      {/* Visual OTDR Trace Waveform Analyzer */}
+      <OtdrWaveform
+        distance={distance}
+        splices={splices}
+        connectors={connectors}
+        wavelength={wavelength}
+        totalLoss={totalLoss}
+      />
     </div>
   );
 }

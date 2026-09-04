@@ -136,6 +136,14 @@ export default function Hero() {
               <a href="#tools" className="btn btn-ghost">
                 🧮 {t("hero_cta_tools")}
               </a>
+              <button
+                type="button"
+                className="btn btn-ghost btn-cv-hero"
+                onClick={() => window.dispatchEvent(new Event("open-resume-modal"))}
+                title={isId ? "Buka & Cetak CV ATS" : "View & Print ATS Resume"}
+              >
+                📄 {isId ? "Preview / Cetak CV" : "ATS Resume (Print)"}
+              </button>
               <a href="#kontak" className="btn btn-ghost">
                 {t("hero_cta_contact")}
               </a>

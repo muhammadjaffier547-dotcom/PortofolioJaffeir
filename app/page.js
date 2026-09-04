@@ -20,6 +20,9 @@ import ScrollProgress from "./components/ScrollProgress";
 import BackToTop from "./components/BackToTop";
 import Preloader from "./components/Preloader";
 import CommandPalette from "./components/CommandPalette";
+import IncidentSimulator from "./components/IncidentSimulator";
+import ResumeModal from "./components/ResumeModal";
+import NOCWallboard from "./components/NOCWallboard";
 import { LanguageProvider } from "./context/LanguageContext";
 
 export default function Home() {
@@ -27,6 +30,8 @@ export default function Home() {
     <LanguageProvider>
       <Preloader />
       <CommandPalette />
+      <ResumeModal />
+      <NOCWallboard />
       <CursorFX />
       <ScrollProgress />
       <div className="site-content">
@@ -38,6 +43,7 @@ export default function Home() {
         <ScrollReveal><Experience /></ScrollReveal>
         <ScrollReveal><Projects /></ScrollReveal>
         <ScrollReveal><TopologyMap /></ScrollReveal>
+        <ScrollReveal><IncidentSimulator /></ScrollReveal>
         <ScrollReveal><Gallery /></ScrollReveal>
         <ScrollReveal><NetworkTools /></ScrollReveal>
         <ScrollReveal><Skills /></ScrollReveal>

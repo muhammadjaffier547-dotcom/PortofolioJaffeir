@@ -56,7 +56,15 @@ export default function StatusBar() {
           </span>
         </div>
         <div className="status-right">
-          UPTIME_NOC <span>{uptime}</span> · <span>{clock}</span>
+          <button
+            type="button"
+            className="statusbar-wb-btn"
+            onClick={() => window.dispatchEvent(new Event("open-noc-wallboard"))}
+            title="Buka Layar Monitor NOC Wallboard Fullscreen"
+          >
+            <span className="live-dot" /> LIVE NOC WALLBOARD
+          </button>
+          <span>UPTIME_NOC <b>{uptime}</b> · <b>{clock}</b></span>
         </div>
       </div>
     </div>

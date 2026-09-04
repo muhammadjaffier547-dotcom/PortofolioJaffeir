@@ -22,6 +22,7 @@ export default function Nav() {
           <a href="#projects" onClick={() => setOpen(false)}>{t("nav_projects")}</a>
           <a href="#dokumentasi" onClick={() => setOpen(false)}>{t("nav_field")}</a>
           <a href="#topologi" onClick={() => setOpen(false)}>{t("nav_topology")}</a>
+          <a href="#insiden" onClick={() => setOpen(false)}>{lang === "id" ? "Troubleshoot" : "Troubleshoot"}</a>
           <a href="#tools" onClick={() => setOpen(false)}>{t("nav_tools")}</a>
           <a href="#keahlian" onClick={() => setOpen(false)}>{t("nav_skills")}</a>
           <a href="#kontak" onClick={() => setOpen(false)}>{t("nav_contact")}</a>
@@ -30,6 +31,16 @@ export default function Nav() {
         <div className="nav-actions">
           {/* Live Latency Telemetry */}
           <LatencyMeter />
+
+          {/* CV ATS Action Button */}
+          <button
+            type="button"
+            className="nav-cv-btn"
+            onClick={() => window.dispatchEvent(new Event("open-resume-modal"))}
+            title={lang === "id" ? "Buka & Cetak CV ATS Standar" : "View & Print ATS Resume"}
+          >
+            📄 {lang === "id" ? "CV" : "CV"}
+          </button>
 
           {/* Language Switcher */}
           <button
