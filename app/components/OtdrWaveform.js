@@ -248,3 +248,4 @@ export default function OtdrWaveform({ distance = 5, splices = 2, connectors = 2
     </div>
   );
 }
+
