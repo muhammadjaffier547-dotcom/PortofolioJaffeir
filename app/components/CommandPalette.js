@@ -2,21 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { contact } from "../data/content";
-
-const COMMANDS = [
-  { id: "terminal", icon: "⚡", title: "Terminal Interaktif", category: "Eksplorasi", action: "#terminal" },
-  { id: "tentang", icon: "👤", title: "Tentang Jaffier", category: "Profil", action: "#tentang" },
-  { id: "pengalaman", icon: "💼", title: "Pengalaman Kerja & NOC", category: "Karir", action: "#pengalaman" },
-  { id: "proyek", icon: "🚀", title: "Studi Kasus Proyek", category: "Proyek", action: "#projects" },
-  { id: "dokumentasi", icon: "📸", title: "Galeri Foto Lapangan (Data Center & OTDR)", category: "Bukti Kerja", action: "#dokumentasi" },
-  { id: "keahlian", icon: "🛠️", title: "Daftar Keahlian & Tools", category: "Skillset", action: "#keahlian" },
-  { id: "kalkulator", icon: "📊", title: "Kalkulator Redaman Fiber Optik", category: "Tool Interaktif", action: "#keahlian" },
-  { id: "sertifikasi", icon: "🏅", title: "Sertifikat MikroTik MTCNA", category: "Kredensial", action: "#sertifikasi" },
-  { id: "pendidikan", icon: "🎓", title: "Riwayat Pendidikan", category: "Pendidikan", action: "#pendidikan" },
-  { id: "kontak", icon: "💬", title: "Hubungi via WhatsApp", category: "Kontak", action: "#kontak" },
-  { id: "cv", icon: "📄", title: "Unduh Berkas CV (PDF)", category: "Dokumen", url: "/cv-jaffier.pdf" },
-  { id: "email", icon: "✉️", title: `Salin Email (${contact.email})`, category: "Kontak", copy: contact.email },
-];
+import { useLanguage } from "../context/LanguageContext";
 
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -24,6 +10,24 @@ export default function CommandPalette() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const inputRef = useRef(null);
+  const { lang, toggleLang } = useLanguage();
+  const isId = lang === "id";
+
+  const commands = useMemo(() => [
+    { id: "terminal", icon: "⚡", title: isId ? "Terminal Interaktif NOC" : "Interactive NOC Terminal", category: isId ? "Eksplorasi" : "Terminal", action: "#terminal" },
+    { id: "tentang", icon: "👤", title: isId ? "Tentang Jaffier" : "About Jaffier", category: isId ? "Profil" : "Profile", action: "#tentang" },
+    { id: "pengalaman", icon: "💼", title: isId ? "Pengalaman Kerja & NOC" : "Work Experience & NOC Roles", category: isId ? "Karir" : "Career", action: "#pengalaman" },
+    { id: "proyek", icon: "🚀", title: isId ? "Studi Kasus Proyek Lapangan" : "Field Case Studies", category: isId ? "Proyek" : "Projects", action: "#projects" },
+    { id: "topologi", icon: "🌐", title: isId ? "Topologi Jaringan NOC Interaktif" : "Interactive NOC Topology Map", category: isId ? "Arsitektur" : "Architecture", action: "#topologi" },
+    { id: "subnet", icon: "🧮", title: isId ? "Kalkulator Subnet & CIDR Visual" : "Visual Subnet & CIDR Calculator", category: isId ? "Tools" : "Tools", action: "#tools" },
+    { id: "fiber", icon: "⚡", title: isId ? "Kalkulator Redaman Fiber Optik" : "Fiber Optic Loss Budget Calc", category: isId ? "Tools" : "Tools", action: "#tools" },
+    { id: "dokumentasi", icon: "📸", title: isId ? "Galeri Foto Lapangan (Data Center & OTDR)" : "Field Photo Gallery & OTDR", category: isId ? "Bukti Kerja" : "Field Logs", action: "#dokumentasi" },
+    { id: "keahlian", icon: "🛠️", title: isId ? "Daftar Keahlian & Tools" : "Technical Skills & Toolset", category: isId ? "Skillset" : "Skills", action: "#keahlian" },
+    { id: "sertifikasi", icon: "🏅", title: isId ? "Sertifikat MikroTik MTCNA" : "MikroTik MTCNA Credential", category: isId ? "Kredensial" : "Credentials", action: "#sertifikasi" },
+    { id: "lang", icon: "🌐", title: isId ? "Ganti Bahasa ke English (Switch to EN)" : "Switch Language to Bahasa Indonesia (Ganti ke ID)", category: isId ? "Bahasa" : "Language", run: () => toggleLang() },
+    { id: "kontak", icon: "💬", title: isId ? "Hubungi via WhatsApp Langsung" : "Direct Message via WhatsApp", category: isId ? "Kontak" : "Contact", action: "#kontak" },
+    { id: "email", icon: "✉️", title: `${isId ? "Salin Email" : "Copy Email"} (${contact.email})`, category: isId ? "Kontak" : "Contact", copy: contact.email },
+  ], [isId, toggleLang]);
 
   // Toggle on Ctrl+K or Cmd+K
   useEffect(() => {
@@ -56,51 +60,58 @@ export default function CommandPalette() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return COMMANDS;
-    return COMMANDS.filter(
+    if (!q) return commands;
+    return commands.filter(
       (c) =>
         c.title.toLowerCase().includes(q) ||
         c.category.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [commands, query]);
 
   const execute = (item) => {
     if (!item) return;
+
+    if (item.run) {
+      item.run();
+      setOpen(false);
+      return;
+    }
+
     if (item.copy) {
-      navigator.clipboard?.writeText(item.copy);
+      navigator.clipboard.writeText(item.copy);
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
         setOpen(false);
-      }, 700);
+      }, 1200);
       return;
     }
+
     if (item.url) {
       window.open(item.url, "_blank");
       setOpen(false);
       return;
     }
+
     if (item.action) {
       const el = document.querySelector(item.action);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       setOpen(false);
     }
   };
 
-  const onKeyDown = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIdx((prev) => (prev + 1) % filtered.length);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIdx((prev) => (prev - 1 + filtered.length) % filtered.length);
-    } else if (e.key === "Enter") {
+    } else if (e.key === "Enter" && filtered[activeIdx]) {
       e.preventDefault();
-      if (filtered[activeIdx]) {
-        execute(filtered[activeIdx]);
-      }
+      execute(filtered[activeIdx]);
     }
   };
 
@@ -108,71 +119,75 @@ export default function CommandPalette() {
 
   return (
     <div
-      className="cmd-palette-backdrop"
+      className="cmd-backdrop"
       onClick={() => setOpen(false)}
-      role="dialog"
-      aria-modal="true"
+      role="presentation"
     >
       <div
-        className="cmd-palette-modal panel"
+        className="cmd-modal panel"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
-        <div className="cmd-search-wrap">
-          <span className="cmd-search-icon">⌘</span>
+        <div className="cmd-header">
+          <span className="cmd-icon">🔍</span>
           <input
             ref={inputRef}
             type="text"
-            className="cmd-search-input"
-            placeholder="Cari bagian, buka proyek, unduh CV, atau salin kontak..."
+            className="cmd-input"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setActiveIdx(0);
             }}
-            onKeyDown={onKeyDown}
-            aria-label="Cari perintah"
+            onKeyDown={handleKeyDown}
+            placeholder={
+              isId
+                ? "Ketik perintah, bagian halaman, atau kalkulator..."
+                : "Type a command, page section, or network tool..."
+            }
           />
-          <span className="cmd-esc-tag">ESC</span>
+          <kbd className="cmd-esc">ESC</kbd>
         </div>
 
         {copied && (
           <div className="cmd-copied-banner">
-            ✔ Email berhasil disalin ke clipboard!
+            ✓ {isId ? "Email berhasil disalin ke clipboard!" : "Email copied to clipboard!"}
           </div>
         )}
 
-        <div className="cmd-list" role="listbox">
+        <div className="cmd-list">
           {filtered.length === 0 ? (
-            <div className="cmd-empty">Tidak ada perintah yang cocok.</div>
+            <div className="cmd-empty">
+              {isId
+                ? "Tidak ada perintah yang cocok."
+                : "No matching commands found."}
+            </div>
           ) : (
             filtered.map((item, idx) => (
-              <button
+              <div
                 key={item.id}
-                type="button"
-                className={`cmd-item ${activeIdx === idx ? "is-active" : ""}`}
-                onClick={() => execute(item)}
+                className={`cmd-item ${idx === activeIdx ? "is-active" : ""}`}
                 onMouseEnter={() => setActiveIdx(idx)}
-                role="option"
-                aria-selected={activeIdx === idx}
+                onClick={() => execute(item)}
               >
                 <span className="cmd-item-icon">{item.icon}</span>
-                <div className="cmd-item-text">
-                  <span className="cmd-item-title">{item.title}</span>
-                  <span className="cmd-item-cat">{item.category}</span>
-                </div>
-                <span className="cmd-item-arrow">↵</span>
-              </button>
+                <span className="cmd-item-title">{item.title}</span>
+                <span className="cmd-item-cat">{item.category}</span>
+              </div>
             ))
           )}
         </div>
 
         <div className="cmd-footer">
-          <span>Gunakan <strong>↑</strong> <strong>↓</strong> untuk memilih</span>
-          <span><strong>ENTER</strong> untuk buka</span>
-          <span><strong>ESC</strong> untuk tutup</span>
+          <span>
+            ↑↓ {isId ? "Navigasi" : "Navigate"} &middot; ↵{" "}
+            {isId ? "Pilih" : "Select"} &middot; ESC{" "}
+            {isId ? "Tutup" : "Close"}
+          </span>
+          <span className="cmd-hotkey-hint">Ctrl + K</span>
         </div>
       </div>
     </div>
   );
 }
-

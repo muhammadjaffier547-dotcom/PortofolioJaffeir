@@ -3,49 +3,80 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import NetworkHUD from "./NetworkHUD";
+import { useLanguage } from "../context/LanguageContext";
 
-const HERO_TEXT = "Menjaga jaringan tetap menyala — dari akar fiber sampai baris konfigurasi.";
-const ACCENT_START = "Menjaga jaringan tetap ".length;
-const ACCENT_END = ACCENT_START + "menyala".length;
+const HEADLINES = {
+  id: {
+    text: "Menjaga jaringan tetap menyala — dari akar fiber sampai baris konfigurasi.",
+    accentWord: "menyala",
+  },
+  en: {
+    text: "Keeping networks alive — from core fiber glass to command line routing.",
+    accentWord: "alive",
+  },
+};
 
 function TypewriterHeadline() {
-  const chars = useMemo(() => Array.from(HERO_TEXT), []);
+  const { lang } = useLanguage();
+  const current = HEADLINES[lang] || HEADLINES.id;
+  const HERO_TEXT = current.text;
+  const chars = useMemo(() => Array.from(HERO_TEXT), [HERO_TEXT]);
   const [visible, setVisible] = useState(0);
   const [deleting, setDeleting] = useState(false);
+
+  // Reset when language changes
+  useEffect(() => {
+    setVisible(0);
+    setDeleting(false);
+  }, [lang]);
 
   useEffect(() => {
     let timer;
 
     if (!deleting && visible < chars.length) {
-      timer = setTimeout(() => setVisible((v) => v + 1), 62);
+      timer = setTimeout(() => setVisible((v) => v + 1), 50);
     } else if (!deleting && visible === chars.length) {
-      timer = setTimeout(() => setDeleting(true), 1800);
+      timer = setTimeout(() => setDeleting(true), 2400);
     } else if (deleting && visible > 0) {
-      timer = setTimeout(() => setVisible((v) => v - 1), 34);
+      timer = setTimeout(() => setVisible((v) => v - 1), 28);
     } else {
-      timer = setTimeout(() => setDeleting(false), 650);
+      timer = setTimeout(() => setDeleting(false), 600);
     }
 
     return () => clearTimeout(timer);
   }, [visible, deleting, chars.length]);
+
+  const accentStart = HERO_TEXT.indexOf(current.accentWord);
+  const accentEnd = accentStart + current.accentWord.length;
 
   return (
     <h1 aria-label={HERO_TEXT} className="typewriter-headline">
       {chars.map((char, index) => {
         if (index >= visible) return null;
         const content = char;
-        const node = index >= ACCENT_START && index < ACCENT_END
-          ? <span className="accent">{content}</span>
-          : content;
-        return <span key={`${index}-${char}`} className="typed-char">{node}</span>;
+        const node =
+          index >= accentStart && index < accentEnd ? (
+            <span className="accent">{content}</span>
+          ) : (
+            content
+          );
+        return (
+          <span key={`${index}-${char}`} className="typed-char">
+            {node}
+          </span>
+        );
       })}
-      <span className="typing-cursor" aria-hidden="true">▌</span>
+      <span className="typing-cursor" aria-hidden="true">
+        ▌
+      </span>
     </h1>
   );
 }
 
 export default function Hero() {
-  // Ensure page always starts at top on initial load/refresh
+  const { lang, t } = useLanguage();
+  const isId = lang === "id";
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       if ("scrollRestoration" in window.history) {
@@ -73,20 +104,20 @@ export default function Hero() {
               <div className="scan" />
             </div>
             <p className="badge-name">Muhammad Jaffier Al Zufri</p>
-            <p className="badge-role">Network Engineer &amp; NOC Operator</p>
+            <p className="badge-role">{t("hero_role")}</p>
             <span className="pill">
-              <span className="dot" /> AKTIF
+              <span className="dot" /> {isId ? "AKTIF" : "ACTIVE"}
             </span>
             <div className="badge-row">
-              <span>LOKASI</span>
+              <span>{isId ? "LOKASI" : "LOCATION"}</span>
               <span>Tangerang Selatan, ID</span>
             </div>
             <div className="badge-row">
-              <span>FOKUS</span>
+              <span>{isId ? "FOKUS" : "FOCUS"}</span>
               <span>ISP &amp; IPTV Infra</span>
             </div>
             <div className="badge-row">
-              <span>SEJAK</span>
+              <span>{isId ? "SEJAK" : "SINCE"}</span>
               <span>2024</span>
             </div>
           </div>
@@ -94,22 +125,19 @@ export default function Hero() {
           <div className="hero-copy">
             <p className="eyebrow">Network Engineer // NOC Operator</p>
             <TypewriterHeadline />
-            <p className="lead">
-              Lulusan Teknik Komputer &amp; Jaringan dengan pengalaman langsung
-              mengoperasikan NOC untuk penyedia ISP &amp; IPTV. Terbiasa dengan
-              konfigurasi MikroTik, administrasi server Linux, monitoring
-              infrastruktur real-time, dan penanganan gangguan fiber optic di
-              lapangan.
-            </p>
+            <p className="lead">{t("hero_desc")}</p>
             <div className="hero-cta">
               <a href="#pengalaman" className="btn btn-primary">
-                Lihat Pengalaman →
+                {t("hero_cta_projects")} →
+              </a>
+              <a href="#topologi" className="btn btn-ghost">
+                🌐 {isId ? "Topologi NOC" : "NOC Topology"}
+              </a>
+              <a href="#tools" className="btn btn-ghost">
+                🧮 {t("hero_cta_tools")}
               </a>
               <a href="#kontak" className="btn btn-ghost">
-                Hubungi Saya
-              </a>
-              <a href="/cv-jaffier.pdf" className="btn btn-ghost" target="_blank" rel="noopener noreferrer">
-                📄 Unduh CV
+                {t("hero_cta_contact")}
               </a>
             </div>
 

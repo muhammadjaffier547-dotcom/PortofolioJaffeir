@@ -2,32 +2,62 @@
 
 import { useState } from "react";
 import { contact } from "../data/content";
+import { useLanguage } from "../context/LanguageContext";
 
-const WA_TEMPLATES = [
-  {
-    icon: "💼",
-    label: "Tawaran Kerja Full-Time",
-    text: "Halo Jaffier, saya melihat portofolio Anda dan tertarik untuk mendiskusikan tawaran kerja posisi Network Engineer / NOC Operator.",
-  },
-  {
-    icon: "🛠️",
-    label: "Proyek Setup MikroTik / Server",
-    text: "Halo Jaffier, saya membutuhkan bantuan untuk instalasi dan konfigurasi jaringan MikroTik / Server Linux.",
-  },
-  {
-    icon: "⚡",
-    label: "Pekerjaan Splicing / Fiber Optic",
-    text: "Halo Jaffier, apakah Anda bersedia untuk pekerjaan troubleshooting / penanganan kabel fiber optic di lapangan?",
-  },
-  {
-    icon: "☕",
-    label: "Diskusi & Networking Santai",
-    text: "Halo Jaffier, salam kenal! Saya terkesan dengan portofolio Anda dan ingin terhubung untuk berdiskusi seputar networking.",
-  },
-];
+const WA_TEMPLATES = {
+  id: [
+    {
+      icon: "💼",
+      label: "Tawaran Kerja Full-Time",
+      text: "Halo Jaffier, saya melihat portofolio Anda dan tertarik untuk mendiskusikan peluang kerja posisi Network Engineer / NOC Operator.",
+    },
+    {
+      icon: "🛠️",
+      label: "Proyek MikroTik / Server",
+      text: "Halo Jaffier, saya membutuhkan jasa konfigurasi jaringan MikroTik / administrasi server Linux untuk kebutuhan infrastruktur.",
+    },
+    {
+      icon: "⚡",
+      label: "Splicing / Fiber Optic",
+      text: "Halo Jaffier, apakah Anda tersedia untuk penanganan fiber optic (splicing / troubleshooting redaman OTDR) di lapangan?",
+    },
+    {
+      icon: "☕",
+      label: "Diskusi & Networking",
+      text: "Halo Jaffier, salam kenal! Saya terkesan dengan portofolio Anda dan ingin terhubung untuk diskusi seputar dunia jaringan.",
+    },
+  ],
+  en: [
+    {
+      icon: "💼",
+      label: "Full-Time Opportunity",
+      text: "Hello Jaffier, I came across your portfolio and would like to discuss a Network Engineer / NOC Operator opportunity.",
+    },
+    {
+      icon: "🛠️",
+      label: "MikroTik / Server Project",
+      text: "Hello Jaffier, I need assistance with MikroTik network deployment / Linux server infrastructure setup.",
+    },
+    {
+      icon: "⚡",
+      label: "Fiber Optic Field Splicing",
+      text: "Hello Jaffier, are you available for on-site fiber optic cable recovery or OTDR loss diagnostic work?",
+    },
+    {
+      icon: "☕",
+      label: "Tech Chat & Networking",
+      text: "Hello Jaffier, pleasure connecting! I was impressed by your portfolio and would love to exchange insights on networking.",
+    },
+  ],
+};
 
 export default function Contact() {
-  const [selectedTemplate, setSelectedTemplate] = useState(WA_TEMPLATES[0]);
+  const { lang, t } = useLanguage();
+  const templates = WA_TEMPLATES[lang] || WA_TEMPLATES.id;
+  const [selectedIdx, setSelectedIdx] = useState(0);
+
+  const selectedTemplate = templates[selectedIdx] || templates[0];
+  const isId = lang === "id";
 
   const waUrl = `https://wa.me/6285893271662?text=${encodeURIComponent(
     selectedTemplate.text
@@ -36,12 +66,12 @@ export default function Contact() {
   return (
     <section id="kontak">
       <div className="wrap">
-        <p className="eyebrow">08 · Buka Koneksi</p>
-        <h2 className="sectitle">Kontak</h2>
+        <p className="eyebrow">{t("contact_eyebrow")}</p>
+        <h2 className="sectitle">{t("contact_title")}</h2>
         <div className="panel contact-panel">
           <p className="prompt">
             <span className="p1">operator@noc</span>:<span className="p2">~$</span>{" "}
-            siap menerima pesan baru_
+            {isId ? "siap menerima pesan & kolaborasi_" : "ready for inquiries & dispatch_"}
           </p>
 
           <div className="contact-rows">
@@ -52,19 +82,21 @@ export default function Contact() {
               </a>
             </div>
             <div className="crow">
-              <span className="k">TELEPON / WHATSAPP</span>
+              <span className="k">{isId ? "TELEPON / WHATSAPP" : "PHONE / WHATSAPP"}</span>
               <a className="v" href={`tel:${contact.phoneHref}`}>
                 {contact.phone}
               </a>
             </div>
             <div className="crow">
-              <span className="k">LOKASI</span>
+              <span className="k">{isId ? "LOKASI" : "LOCATION"}</span>
               <span className="v">{contact.location}</span>
             </div>
             <div className="crow">
               <span className="k">STATUS</span>
               <span className="v" style={{ color: "var(--teal)" }}>
-                Terbuka untuk peluang baru (Full-Time / Proyek)
+                {isId
+                  ? "Terbuka untuk peluang baru (Full-Time / Kontrak Proyek)"
+                  : "Open to new opportunities (Full-Time / Contract Projects)"}
               </span>
             </div>
           </div>
@@ -72,18 +104,24 @@ export default function Contact() {
           {/* Quick WhatsApp Template Selector */}
           <div className="contact-wa-builder">
             <div className="wa-builder-head">
-              <span className="wa-builder-badge">PILIH TOPIK PESAN CEPAT</span>
-              <p>Pilih template di bawah agar pesan WhatsApp otomatis terketik rapi:</p>
+              <span className="wa-builder-badge">
+                {isId ? "PILIH TEMPLATE PESAN WHATSAPP" : "SELECT WHATSAPP MESSAGE PRESET"}
+              </span>
+              <p>
+                {isId
+                  ? "Pilih topik di bawah agar pesan WhatsApp terisi otomatis:"
+                  : "Pick a topic below to auto-format your direct WhatsApp message:"}
+              </p>
             </div>
             <div className="wa-template-grid">
-              {WA_TEMPLATES.map((tmpl) => (
+              {templates.map((tmpl, idx) => (
                 <button
                   key={tmpl.label}
                   type="button"
                   className={`wa-tmpl-btn ${
-                    selectedTemplate.label === tmpl.label ? "is-active" : ""
+                    selectedIdx === idx ? "is-active" : ""
                   }`}
-                  onClick={() => setSelectedTemplate(tmpl)}
+                  onClick={() => setSelectedIdx(idx)}
                 >
                   <span className="wa-tmpl-icon">{tmpl.icon}</span>
                   <span className="wa-tmpl-label">{tmpl.label}</span>
@@ -91,7 +129,9 @@ export default function Contact() {
               ))}
             </div>
             <div className="wa-preview-box">
-              <span className="wa-preview-tag">Pratinjau Pesan:</span>
+              <span className="wa-preview-tag">
+                {isId ? "Pratinjau Pesan:" : "Message Preview:"}
+              </span>
               <p>"{selectedTemplate.text}"</p>
             </div>
           </div>
@@ -103,10 +143,10 @@ export default function Contact() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              💬 Kirim via WhatsApp Langsung →
+              💬 {isId ? "Kirim via WhatsApp Langsung →" : "Send via WhatsApp Direct →"}
             </a>
             <a className="btn btn-ghost" href={`mailto:${contact.email}`}>
-              ✉️ Kirim Email Biasa
+              ✉️ {isId ? "Kirim Email Biasa" : "Send Standard Email"}
             </a>
           </div>
         </div>

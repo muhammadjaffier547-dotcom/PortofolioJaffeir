@@ -2,24 +2,39 @@
 
 import { useState } from "react";
 import { certification } from "../data/content";
+import { useLanguage } from "../context/LanguageContext";
 
-const MTCNA_MODULES = [
-  "Routing Dinamis & Statis",
-  "Bridging & Segmentasi VLAN",
-  "Firewall Filter, NAT & Mangle",
-  "Manajemen Bandwidth & QoS",
-  "Tunneling & VPN (PPPoE, SSTP)",
-  "Network Diagnostics (Torch, Traceroute)",
-];
+const MTCNA_MODULES = {
+  id: [
+    "Routing Dinamis & Statis (OSPF, Default Route)",
+    "Bridging & Segmentasi 802.1Q VLAN",
+    "Firewall Filter, NAT & Mangle",
+    "Manajemen Bandwidth & Simple QoS Queue",
+    "Tunneling & VPN (PPPoE, SSTP, WireGuard)",
+    "Network Diagnostics (Torch, Packet Sniffer, Traceroute)",
+  ],
+  en: [
+    "Dynamic & Static Routing (OSPF, Default Gateways)",
+    "Bridging & 802.1Q VLAN Segmentation",
+    "Firewall Filter, Source/Dest NAT & Mangle",
+    "Bandwidth Management & Simple QoS Queues",
+    "Tunneling & VPN Architectures (PPPoE, WireGuard)",
+    "Network Telemetry (Torch, Packet Sniffer, Traceroute)",
+  ],
+};
 
 export default function Certification() {
   const [open, setOpen] = useState(false);
+  const { lang, t } = useLanguage();
+  const isId = lang === "id";
+
+  const modules = MTCNA_MODULES[lang] || MTCNA_MODULES.id;
 
   return (
     <section id="sertifikasi">
       <div className="wrap">
-        <p className="eyebrow">06 · Kredensial</p>
-        <h2 className="sectitle">Sertifikasi Resmi</h2>
+        <p className="eyebrow">{t("cert_eyebrow")}</p>
+        <h2 className="sectitle">{t("cert_title")}</h2>
 
         <div
           className="panel cert-card cert-trigger"
@@ -51,25 +66,21 @@ export default function Certification() {
               />
             </svg>
           </div>
-
           <div className="cert-body">
-            <div className="cert-badge-row">
-              <span className="cert-label">KREDENSIAL TERVERIFIKASI</span>
-              <span className="cert-status-dot">● RESMI</span>
-            </div>
+            <span className="cert-label">
+              {isId ? "KREDENSIAL TERVERIFIKASI" : "VERIFIED CREDENTIAL"}
+            </span>
             <h3>{certification.name}</h3>
-            <p className="cert-subtext">
-              {certification.description} · ID: <strong>{certification.id}</strong>
+            <p>
+              {isId ? "Lembaga Penerbit:" : "Issuer:"}{" "}
+              <span>MikroTikls SIA (Riga, Latvia)</span> &middot; ID:{" "}
+              <span>{certification.id}</span>
             </p>
-            <div className="cert-preview-chips">
-              <span>MikroTik RouterOS</span>
-              <span>Routing &amp; Switching</span>
-              <span>Firewall NAT</span>
-            </div>
           </div>
-
-          <div className="cert-arrow-wrap">
-            <span className="cert-arrow-btn">LIHAT KREDENSIAL ↗</span>
+          <div className="cert-arrow">
+            <span className="cert-arrow-btn">
+              {isId ? "LIHAT KREDENSIAL" : "VIEW CREDENTIAL"} ↗
+            </span>
           </div>
         </div>
 
@@ -120,21 +131,32 @@ export default function Certification() {
                   </svg>
                 </div>
 
-                <p className="modal-kicker">SERTIFIKASI INTERNASIONAL TERVERIFIKASI</p>
+                <p className="modal-kicker">
+                  {isId
+                    ? "SERTIFIKASI INTERNASIONAL TERVERIFIKASI"
+                    : "VERIFIED INTERNATIONAL CERTIFICATION"}
+                </p>
                 <h3 id="cert-title">{certification.name}</h3>
                 <p className="modal-issuer">
-                  Lembaga Penerbit: <strong>MikroTikls SIA (Riga, Latvia)</strong>
+                  {isId ? "Lembaga Penerbit:" : "Issuing Body:"}{" "}
+                  <strong>MikroTikls SIA (Riga, Latvia)</strong>
                 </p>
 
                 <div className="modal-id">
-                  <span>ID KREDENSIAL SERTIFIKAT</span>
+                  <span>
+                    {isId ? "ID KREDENSIAL SERTIFIKAT" : "CERTIFICATE CREDENTIAL ID"}
+                  </span>
                   <strong>{certification.id}</strong>
                 </div>
 
                 <div className="cert-modules-section">
-                  <span className="cert-modules-title">Kompetensi yang Diuji &amp; Dikuasai:</span>
+                  <span className="cert-modules-title">
+                    {isId
+                      ? "Kompetensi yang Diuji & Dikuasai:"
+                      : "Assessed & Verified Core Competencies:"}
+                  </span>
                   <div className="cert-modules-grid">
-                    {MTCNA_MODULES.map((mod) => (
+                    {modules.map((mod) => (
                       <div key={mod} className="cert-module-item">
                         <span className="mod-check">✔</span>
                         <span>{mod}</span>
@@ -150,13 +172,13 @@ export default function Certification() {
                     rel="noopener noreferrer"
                     className="btn btn-ghost cert-verify-btn"
                   >
-                    🔍 Verifikasi di Portal MikroTik ↗
+                    🔍 {isId ? "Verifikasi di Portal MikroTik ↗" : "Verify on MikroTik Portal ↗"}
                   </a>
                   <button
                     className="btn btn-primary"
                     onClick={() => setOpen(false)}
                   >
-                    Tutup
+                    {isId ? "Tutup" : "Close"}
                   </button>
                 </div>
               </div>

@@ -5,9 +5,10 @@ import Terminal from "./components/Terminal";
 import About from "./components/About";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
+import TopologyMap from "./components/TopologyMap";
 import Gallery from "./components/Gallery";
+import NetworkTools from "./components/NetworkTools";
 import Skills from "./components/Skills";
-import FiberCalculator from "./components/FiberCalculator";
 import Certification from "./components/Certification";
 import Education from "./components/Education";
 import Contact from "./components/Contact";
@@ -19,10 +20,11 @@ import ScrollProgress from "./components/ScrollProgress";
 import BackToTop from "./components/BackToTop";
 import Preloader from "./components/Preloader";
 import CommandPalette from "./components/CommandPalette";
+import { LanguageProvider } from "./context/LanguageContext";
 
 export default function Home() {
   return (
-    <>
+    <LanguageProvider>
       <Preloader />
       <CommandPalette />
       <CursorFX />
@@ -35,13 +37,10 @@ export default function Home() {
         <ScrollReveal><About /></ScrollReveal>
         <ScrollReveal><Experience /></ScrollReveal>
         <ScrollReveal><Projects /></ScrollReveal>
+        <ScrollReveal><TopologyMap /></ScrollReveal>
         <ScrollReveal><Gallery /></ScrollReveal>
-        <ScrollReveal>
-          <Skills />
-          <div className="wrap">
-            <FiberCalculator />
-          </div>
-        </ScrollReveal>
+        <ScrollReveal><NetworkTools /></ScrollReveal>
+        <ScrollReveal><Skills /></ScrollReveal>
         <ScrollReveal><Certification /></ScrollReveal>
         <ScrollReveal><Education /></ScrollReveal>
         <ScrollReveal><Contact /></ScrollReveal>
@@ -49,6 +48,6 @@ export default function Home() {
       </div>
       <BackToTop />
       <MusicPlayer />
-    </>
+    </LanguageProvider>
   );
 }

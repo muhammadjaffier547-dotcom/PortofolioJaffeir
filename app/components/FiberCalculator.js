@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function FiberCalculator() {
   const [distance, setDistance] = useState(5);
   const [splices, setSplices] = useState(2);
   const [connectors, setConnectors] = useState(2);
   const [wavelength, setWavelength] = useState("1310"); // 1310nm or 1550nm
+  const { lang } = useLanguage();
+  const isId = lang === "id";
 
   // ITU-T G.652 standard attenuation constants
   const attenuationRate = wavelength === "1310" ? 0.35 : 0.22; // dB/km
@@ -24,34 +27,46 @@ export default function FiberCalculator() {
     const val = parseFloat(totalLoss);
     if (val < 15) {
       return {
-        label: "KONDISI PRIMA",
-        desc: "Kualitas link sangat jernih, transmisi optimal untuk 10G Uplink.",
+        label: isId ? "KONDISI PRIMA" : "PRISTINE LINK QUALITY",
+        desc: isId
+          ? "Kualitas link sangat jernih, transmisi optimal untuk 10G Uplink."
+          : "Ultra-low attenuation, fully optimal for 10G SFP+ MetroLink.",
         color: "#00ff9d",
       };
     } else if (val <= 26) {
       return {
-        label: "KONDISI STANDAR NORMAL",
-        desc: "Sesuai ambang batas penerimaan sinyal GPON/MetroLink (toleransi s/d -27 dBm).",
+        label: isId ? "KONDISI STANDAR NORMAL" : "STANDARD ACCEPTABLE",
+        desc: isId
+          ? "Sesuai ambang batas penerimaan sinyal GPON/MetroLink (toleransi s/d -27 dBm)."
+          : "Meets standard receiver sensitivity thresholds (tolerance up to -27 dBm).",
         color: "var(--teal)",
       };
     } else {
       return {
-        label: "PERINGATAN REDAMAN TINGGI",
-        desc: "Redaman mendekati batas kritis. Dianjurkan re-splicing atau pembersihan konektor.",
+        label: isId ? "PERINGATAN REDAMAN TINGGI" : "CRITICAL ATTENUATION WARNING",
+        desc: isId
+          ? "Redaman mendekati batas kritis. Dianjurkan re-splicing atau pembersihan konektor."
+          : "Attenuation approaching link failure limit. Re-splicing or ferrule cleaning recommended.",
         color: "var(--copper)",
       };
     }
-  }, [totalLoss]);
+  }, [totalLoss, isId]);
 
   return (
     <div className="fiber-calc panel">
       <div className="fiber-calc-head">
         <div className="fiber-calc-title">
-          <span className="fiber-calc-badge">TOOL LAPANGAN</span>
-          <h3>Kalkulator Redaman Fiber Optik (Optical Budget)</h3>
+          <span className="fiber-calc-badge">ITU-T G.652</span>
+          <h3>
+            {isId
+              ? "Kalkulator Redaman Fiber Optik (Optical Loss Budget)"
+              : "Optical Fiber Loss Budget Calculator"}
+          </h3>
         </div>
         <p className="fiber-calc-sub">
-          Hitung estimasi batas redaman kabel fiber optik berdasarkan standar industri ITU-T G.652 sebelum pengetesan dengan OPM / OTDR.
+          {isId
+            ? "Hitung estimasi batas redaman kabel fiber optik berdasarkan standar industri ITU-T G.652 sebelum pengetesan dengan OPM / OTDR."
+            : "Estimate total end-to-end optical link loss budget per ITU-T G.652 standards before field verification with OPM / OTDR."}
         </p>
       </div>
 
@@ -60,7 +75,9 @@ export default function FiberCalculator() {
         <div className="fiber-calc-inputs">
           <div className="calc-group">
             <div className="calc-label-row">
-              <label htmlFor="range-distance">Panjang Jalur Kabel (km)</label>
+              <label htmlFor="range-distance">
+                {isId ? "Panjang Jalur Kabel (km):" : "Cable Span Distance (km):"}
+              </label>
               <strong>{distance} km</strong>
             </div>
             <input
@@ -76,7 +93,9 @@ export default function FiberCalculator() {
 
           <div className="calc-row-2col">
             <div className="calc-group">
-              <label htmlFor="select-splices">Titik Sambungan (Splicing)</label>
+              <label htmlFor="select-splices">
+                {isId ? "Titik Sambungan (Splicing):" : "Fusion Splice Points:"}
+              </label>
               <div className="calc-stepper">
                 <button
                   type="button"
@@ -85,7 +104,9 @@ export default function FiberCalculator() {
                 >
                   -
                 </button>
-                <span id="select-splices">{splices} titik</span>
+                <span id="select-splices">
+                  {splices} {isId ? "titik" : "splices"}
+                </span>
                 <button
                   type="button"
                   onClick={() => setSplices((v) => Math.min(20, v + 1))}
@@ -97,7 +118,9 @@ export default function FiberCalculator() {
             </div>
 
             <div className="calc-group">
-              <label htmlFor="select-connectors">Pasang Konektor (ODF/Patch)</label>
+              <label htmlFor="select-connectors">
+                {isId ? "Pasang Konektor (ODF/Patch):" : "Connector Pairs (ODF):"}
+              </label>
               <div className="calc-stepper">
                 <button
                   type="button"
@@ -106,7 +129,9 @@ export default function FiberCalculator() {
                 >
                   -
                 </button>
-                <span id="select-connectors">{connectors} pasang</span>
+                <span id="select-connectors">
+                  {connectors} {isId ? "pasang" : "pairs"}
+                </span>
                 <button
                   type="button"
                   onClick={() => setConnectors((v) => Math.min(10, v + 1))}
@@ -119,18 +144,24 @@ export default function FiberCalculator() {
           </div>
 
           <div className="calc-group">
-            <span className="calc-label-inline">Panjang Gelombang Laser:</span>
+            <span className="calc-label-inline">
+              {isId ? "Panjang Gelombang Laser:" : "Optical Laser Wavelength:"}
+            </span>
             <div className="calc-radio-group">
               <button
                 type="button"
-                className={`calc-chip-btn ${wavelength === "1310" ? "is-active" : ""}`}
+                className={`calc-chip-btn ${
+                  wavelength === "1310" ? "is-active" : ""
+                }`}
                 onClick={() => setWavelength("1310")}
               >
                 1310 nm (0.35 dB/km)
               </button>
               <button
                 type="button"
-                className={`calc-chip-btn ${wavelength === "1550" ? "is-active" : ""}`}
+                className={`calc-chip-btn ${
+                  wavelength === "1550" ? "is-active" : ""
+                }`}
                 onClick={() => setWavelength("1550")}
               >
                 1550 nm (0.22 dB/km)
@@ -141,7 +172,9 @@ export default function FiberCalculator() {
 
         {/* Output Calculation Result Card */}
         <div className="fiber-calc-result">
-          <span className="result-kicker">ESTIMASI TOTAL REDAMAN LINK</span>
+          <span className="result-kicker">
+            {isId ? "ESTIMASI TOTAL REDAMAN LINK" : "ESTIMATED TOTAL LINK LOSS"}
+          </span>
           <div className="result-number-wrap">
             <span className="result-number">{totalLoss}</span>
             <span className="result-unit">dB</span>
@@ -159,11 +192,13 @@ export default function FiberCalculator() {
           </div>
 
           <p className="result-note">
-            <i>*</i> Rumus: (Jarak × {attenuationRate}) + (Splicing × 0.1) + (Konektor × 0.5)
+            <i>*</i>{" "}
+            {isId
+              ? `Rumus: (${distance}km × ${attenuationRate}) + (${splices} × 0.1) + (${connectors} × 0.5)`
+              : `Formula: (${distance}km × ${attenuationRate}) + (${splices} × 0.1) + (${connectors} × 0.5)`}
           </p>
         </div>
       </div>
     </div>
   );
 }
-
