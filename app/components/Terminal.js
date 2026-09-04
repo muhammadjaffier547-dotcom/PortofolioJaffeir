@@ -119,7 +119,7 @@ export default function Terminal() {
         push([
           { type: "out", text: "Dokumentasi & Bukti Fisik Lapangan:" },
           { type: "out", text: "• Data Center APJII & Server Rack" },
-          { type: "out", text: "• Pengukuran Redaman Yokogawa AQ1000 (-25.9 dBm)" },
+          { type: "out", text: "• Pengukuran Redaman Yokogawa AQ1000 (-25.9 dBm - Indikasi Bad Core/Loss Kritis)" },
           { type: "out", text: "• Penyambungan Core Fiber Lapangan (Fusion Splicer)" },
           { type: "out", text: "• Manajemen ODF & Patch Cord Sunvone" },
           { type: "out", text: "• Monitoring Trafik VLAN MikroTik Winbox (0% loss)" },
@@ -178,7 +178,7 @@ export default function Terminal() {
       { type: "out", text: "  ping <host>     — uji transmisi paket ICMP (contoh: ping 8.8.8.8)" },
       { type: "out", text: "  traceroute <ip> — lacak hop rute jaringan ke tujuan" },
       { type: "out", text: "  route           — cetak tabel routing MikroTik (ip route print)" },
-      { type: "out", text: "  otdr            — baca log redaman optik Yokogawa AQ1000" },
+      { type: "out", text: "  otdr            — baca log redaman optik & diagnosa bad core Yokogawa AQ1000" },
       { type: "out", text: " " },
       { type: "out", text: "Shortcut Halaman:" },
       { type: "out", text: "  tentang, pengalaman, proyek, dokumentasi, keahlian, sertifikasi, kontak" },
@@ -244,11 +244,12 @@ export default function Terminal() {
 
   function simOtdr() {
     push([
-      { type: "sys", text: "YOKOGAWA AQ1000 — OPTICAL POWER & LOSS REPORT" },
+      { type: "sys", text: "YOKOGAWA AQ1000 — OPTICAL POWER CHECKER & FAULT ANALYSIS" },
       { type: "out", text: "Mode: Power Checker  ·  Wavelength: SM 1310nm" },
-      { type: "out", text: "Measured Level: -25.90 dBm  [NORMAL]" },
+      { type: "err", text: "Measured Level: -25.90 dBm  [ALERT: REDAMAN KRITIS / ABNORMAL]" },
       { type: "out", text: "Lower Threshold: -28.00 dBm  |  Upper Threshold: -10.00 dBm" },
-      { type: "out", text: "Status: Optical Link PASS · Siap untuk terminasi ODF/ONU" },
+      { type: "err", text: "Diagnosa: Level redaman abnormal mendekati ambang batas toleransi. Indikasi bad core, bending loss ekstrem, atau partial fiber cut." },
+      { type: "out", text: "Tindakan Lanjutan: Pembersihan ferrule adapter ODF, tracing patch cord, dan re-splicing core kaca." },
     ]);
   }
 

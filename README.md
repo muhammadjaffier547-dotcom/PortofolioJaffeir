@@ -30,7 +30,7 @@ Portofolio profesional interaktif berorientasi industri **Network Engineering & 
      - *Data Center APJII & Server Rack*
      - *Instalasi Switch Cisco Sunvone di Hotel Mangkuluhur*
      - *Distribusi Kabel Fiber High-Density Gedung UOB Plaza*
-     - *Pengukuran Redaman Yokogawa AQ1000 (-25.9 dBm)*
+     - *Deteksi Redaman Kritis & Bad Core Yokogawa AQ1000 (-25.9 dBm)*
      - *Penyambungan Core Fiber Lapangan (Fusion Splicing)*
      - *Manajemen Patch Cord ODF Sunvone Telkom/Indosat*
      - *Monitoring Throughput & Bandwidth VLAN 204 Winbox*

@@ -18,6 +18,7 @@ const GALLERY_ITEMS = [
     title: "Data Center APJII & Server Rack",
     category: "Infrastruktur Server & Backbone",
     src: "/gallery/datacenter-rack.jpg",
+    objectPosition: "center 18%",
     desc: "Inspeksi berkala, penataan kabel, dan manajemen jalur interkoneksi perangkat rack di ruang Data Center.",
     tags: ["Data Center", "Server Rack", "MetroLink", "Patching"],
   },
@@ -42,11 +43,12 @@ const GALLERY_ITEMS = [
   {
     id: 4,
     filter: "otdr",
-    title: "Pengukuran Redaman Yokogawa AQ1000",
-    category: "Optical Power Testing",
+    title: "Deteksi Redaman Kritis & Bad Core (Yokogawa AQ1000)",
+    category: "Troubleshooting Redaman Fiber Optik",
     src: "/gallery/yokogawa-otdr.jpg",
-    desc: "Validasi level daya sinyal optik pada panjang gelombang SM 1310nm (-25.9 dBm normal range) menggunakan alat ukur Yokogawa AQ1000.",
-    tags: ["Yokogawa OTDR", "Power Checker", "SM 1310nm", "dBm Testing"],
+    objectPosition: "center 30%",
+    desc: "Hasil pengukuran daya optik menunjukkan level redaman kritis -25.9 dBm (melewati batas wajar dan mendekati limit -28.00 dBm). Kondisi abnormal ini mengindikasikan adanya bad core, bending loss ekstrem, atau partial fiber cut yang memerlukan penanganan recovery core.",
+    tags: ["Yokogawa AQ1000", "Redaman Kritis (-25.9 dBm)", "Bad Core", "Fiber Cut Indication", "Recovery Core"],
   },
   {
     id: 5,
@@ -159,7 +161,7 @@ export default function Gallery() {
                   alt={item.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "cover", objectPosition: item.objectPosition || "center" }}
                 />
                 <div className="gallery-overlay">
                   <span className="gallery-zoom-icon">🔍 KLIK UNTUK DETAIL</span>
