@@ -199,13 +199,13 @@ const GALLERY_ITEMS = [
   },
 ];
 
-// 3D Cover Flow Carousel Subcomponent (Perfected 3D Perspective & Drag Gesture)
+// 3D Cover Flow Carousel Subcomponent (Ultra-Responsive Swipe & Direct Controls)
 function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   const containerRef = useRef(null);
   const cardsRef = useRef([]);
   const currentPosRef = useRef(0);
   const targetPosRef = useRef(0);
-  const cardWidthRef = useRef(320);
+  const cardWidthRef = useRef(300);
   const animFrameRef = useRef(null);
   const autoPlayTimerRef = useRef(null);
   const isDraggingRef = useRef(false);
@@ -214,11 +214,11 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const total = items.length;
-  const rotate = 40;
-  const depth = 0.7;
+  const rotate = 36;
+  const depth = 0.65;
   const gap = 0.05;
   const falloff = 0.56;
-  const fade = 0.15;
+  const fade = 0.14;
   const loop = total > 3;
 
   const normalizeIndex = (pos) => {
@@ -227,7 +227,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   };
 
   const updateTransforms = () => {
-    const cardWidth = cardWidthRef.current || 320;
+    const cardWidth = cardWidthRef.current || 300;
     if (total === 0) return;
 
     const spacing = cardWidth * (1 + gap);
@@ -242,7 +242,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       }
       const absU = Math.abs(u);
 
-      // Hide distant cards beyond 3.5 steps to completely prevent horizontal viewport blowout
+      // Hide distant cards beyond 3.5 steps to prevent horizontal overflow
       if (absU > 3.6) {
         card.style.visibility = "hidden";
         card.style.pointerEvents = "none";
@@ -285,11 +285,23 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         animFrameRef.current = null;
         return;
       }
-      currentPosRef.current += diff * 0.16;
+      currentPosRef.current += diff * 0.18;
       updateTransforms();
       animFrameRef.current = requestAnimationFrame(step);
     };
     animFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const goPrev = () => {
+    const currentTarget = Math.round(targetPosRef.current);
+    glideTo(currentTarget - 1);
+    resetAutoplay();
+  };
+
+  const goNext = () => {
+    const currentTarget = Math.round(targetPosRef.current);
+    glideTo(currentTarget + 1);
+    resetAutoplay();
   };
 
   const resetAutoplay = () => {
@@ -298,11 +310,14 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       if (!isDraggingRef.current && total > 1) {
         glideTo(targetPosRef.current + 1);
       }
-    }, 5500);
+    }, 6000);
   };
 
-  // Pointer Drag Handlers with momentum
+  // Pointer Drag Handlers with responsive sensitivity
   const handlePointerDown = (e) => {
+    // If clicked on a button, do not capture
+    if (e.target.closest(".coverflow-nav-btn")) return;
+
     if (animFrameRef.current !== null) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -315,8 +330,9 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       id: e.pointerId,
       startX: e.clientX,
       startPos: currentPosRef.current,
-      velocity: 0,
+      startTime: performance.now(),
       lastTime: performance.now(),
+      velocity: 0,
       targetEl: e.target,
     };
     resetAutoplay();
@@ -326,17 +342,21 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     const info = pointerInfoRef.current;
     if (!info || info.id !== e.pointerId) return;
 
-    if (Math.abs(e.clientX - dragStartRef.current) > 5) {
+    const diffX = e.clientX - info.startX;
+    if (Math.abs(diffX) > 4) {
       isDraggingRef.current = true;
     }
 
-    const cardWidth = (cardWidthRef.current || 320) * (1 + gap);
-    if (!cardWidth) return;
-
+    const cardWidth = cardWidthRef.current || 300;
     const now = performance.now();
     const prevPos = currentPosRef.current;
-    currentPosRef.current = info.startPos - (e.clientX - info.startX) / cardWidth;
-    info.velocity = ((currentPosRef.current - prevPos) / Math.max(now - info.lastTime, 1)) * 1000;
+
+    // 1.5x sensitivity makes swipe feel light and responsive
+    const dragSensitivity = 1.5;
+    currentPosRef.current = info.startPos - (diffX * dragSensitivity) / cardWidth;
+
+    const dt = Math.max(now - info.lastTime, 1);
+    info.velocity = ((currentPosRef.current - prevPos) / dt) * 1000;
     info.lastTime = now;
 
     const normalized = normalizeIndex(currentPosRef.current);
@@ -351,7 +371,11 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     if (!info || info.id !== e.pointerId) return;
     pointerInfoRef.current = null;
 
-    if (!isDraggingRef.current && info.targetEl) {
+    const diffX = e.clientX - info.startX;
+    const isDrag = isDraggingRef.current || Math.abs(diffX) > 6;
+
+    // 1. If it was a tap without drag:
+    if (!isDrag && info.targetEl) {
       const clickedCard = info.targetEl.closest(".coverflow-card");
       if (clickedCard) {
         const cardIndex = cardsRef.current.indexOf(clickedCard);
@@ -375,20 +399,30 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       }
     }
 
-    const inertia = Math.max(-2, Math.min(2, (info.velocity || 0) * 0.16));
-    glideTo(Math.round(currentPosRef.current + inertia));
+    // 2. If it was a swipe/drag:
+    // Natural flick detection: swiping > 40px or flick velocity > 0.25
+    const currentRound = Math.round(info.startPos);
+    let target = Math.round(currentPosRef.current);
+
+    if (Math.abs(diffX) > 40 || Math.abs(info.velocity) > 0.25) {
+      if (diffX < -30 || info.velocity > 0.2) {
+        target = Math.max(currentRound + 1, Math.round(currentPosRef.current));
+      } else if (diffX > 30 || info.velocity < -0.2) {
+        target = Math.min(currentRound - 1, Math.round(currentPosRef.current));
+      }
+    }
+
+    glideTo(target);
     resetAutoplay();
   };
 
   // Wheel horizontal navigation
   const handleWheel = (e) => {
-    const cardWidth = (cardWidthRef.current || 320) * (1 + gap);
-    if (!cardWidth) return;
-
+    const cardWidth = cardWidthRef.current || 300;
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (Math.abs(delta) < 8) return;
+    if (Math.abs(delta) < 6) return;
 
-    currentPosRef.current += (delta / cardWidth) * 0.75;
+    currentPosRef.current += (delta / cardWidth) * 0.9;
     if (animFrameRef.current !== null) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -399,19 +433,17 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     clearTimeout(containerRef.current?.wheelTimer);
     containerRef.current.wheelTimer = setTimeout(() => {
       glideTo(Math.round(currentPosRef.current));
-    }, 120);
+    }, 100);
   };
 
   // Keyboard navigation
   const handleKeyDown = (e) => {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      glideTo(Math.round(targetPosRef.current) - 1);
-      resetAutoplay();
+      goPrev();
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
-      glideTo(Math.round(targetPosRef.current) + 1);
-      resetAutoplay();
+      goNext();
     }
   };
 
@@ -427,7 +459,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         cardWidthRef.current = first.offsetWidth;
       } else {
         const sw = window.innerWidth;
-        cardWidthRef.current = Math.min(380, Math.max(250, sw * 0.28));
+        cardWidthRef.current = Math.min(340, Math.max(240, sw * 0.28));
       }
       updateTransforms();
     };
@@ -451,71 +483,71 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     <div
       className="coverflow-wrapper"
       style={{
-        "--cf-card": "clamp(250px, 30vw, 380px)",
+        "--cf-card": "clamp(240px, 28vw, 350px)",
       }}
     >
-      {/* 3D Viewport Stage */}
-      <div
-        ref={containerRef}
-        className="coverflow-stage"
-        tabIndex={0}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        onWheel={handleWheel}
-        onKeyDown={handleKeyDown}
-        aria-label="3D Coverflow Documentation Carousel"
-        role="region"
-      >
-        <div className="coverflow-track">
-          {items.map((item, idx) => {
-            const title = isId ? item.titleId : item.titleEn;
-            const category = isId ? item.categoryId : item.categoryEn;
+      {/* Relative container holding stage and floating sibling buttons */}
+      <div className="coverflow-stage-rel" style={{ position: "relative", width: "100%" }}>
+        {/* 3D Viewport Stage */}
+        <div
+          ref={containerRef}
+          className="coverflow-stage"
+          tabIndex={0}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onWheel={handleWheel}
+          onKeyDown={handleKeyDown}
+          aria-label="3D Coverflow Documentation Carousel"
+          role="region"
+        >
+          <div className="coverflow-track">
+            {items.map((item, idx) => {
+              const title = isId ? item.titleId : item.titleEn;
+              const category = isId ? item.categoryId : item.categoryEn;
 
-            return (
-              <div
-                key={item.id}
-                ref={(el) => (cardsRef.current[idx] = el)}
-                className="coverflow-card"
-                role="group"
-                aria-label={`Slide ${idx + 1} of ${total}: ${title}`}
-              >
-                <div className="coverflow-card-inner">
-                  <Image
-                    src={item.src}
-                    alt={title}
-                    fill
-                    sizes="(max-width: 768px) 300px, 420px"
-                    draggable={false}
-                    className="coverflow-img"
-                    style={{
-                      objectFit: "cover",
-                      objectPosition: item.objectPosition || "center",
-                    }}
-                  />
-                  <div className="coverflow-card-glass">
-                    <span className="coverflow-pill">{category.split("&")[0].trim()}</span>
-                    <h4 className="coverflow-card-title">{title}</h4>
-                  </div>
-                  <div className="coverflow-center-indicator">
-                    <span>🔍 {isId ? "Buka Detail" : "Inspect"}</span>
+              return (
+                <div
+                  key={item.id}
+                  ref={(el) => (cardsRef.current[idx] = el)}
+                  className="coverflow-card"
+                  role="group"
+                  aria-label={`Slide ${idx + 1} of ${total}: ${title}`}
+                >
+                  <div className="coverflow-card-inner">
+                    <Image
+                      src={item.src}
+                      alt={title}
+                      fill
+                      sizes="(max-width: 768px) 300px, 420px"
+                      draggable={false}
+                      className="coverflow-img"
+                      style={{
+                        objectFit: "cover",
+                        objectPosition: item.objectPosition || "center",
+                      }}
+                    />
+                    <div className="coverflow-card-glass">
+                      <span className="coverflow-pill">{category.split("&")[0].trim()}</span>
+                      <h4 className="coverflow-card-title">{title}</h4>
+                    </div>
+                    <div className="coverflow-center-indicator">
+                      <span>🔍 {isId ? "Buka Detail" : "Inspect"}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        {/* Floating Navigation Controls */}
+        {/* Floating Navigation Controls (Placed OUTSIDE stage so clicks are 100% reliable) */}
         <button
           type="button"
           className="coverflow-nav-btn coverflow-prev"
-          onClick={(e) => {
-            e.stopPropagation();
-            glideTo(Math.round(targetPosRef.current) - 1);
-            resetAutoplay();
-          }}
+          onClick={goPrev}
+          onPointerDown={(e) => e.stopPropagation()}
           aria-label="Foto Sebelumnya"
         >
           ‹
@@ -523,11 +555,8 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         <button
           type="button"
           className="coverflow-nav-btn coverflow-next"
-          onClick={(e) => {
-            e.stopPropagation();
-            glideTo(Math.round(targetPosRef.current) + 1);
-            resetAutoplay();
-          }}
+          onClick={goNext}
+          onPointerDown={(e) => e.stopPropagation()}
           aria-label="Foto Selanjutnya"
         >
           ›
