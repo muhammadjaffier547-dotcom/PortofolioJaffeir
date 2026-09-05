@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 
 const CATEGORIES_DATA = {
@@ -199,9 +199,364 @@ const GALLERY_ITEMS = [
   },
 ];
 
+// 3D Cover Flow Carousel Subcomponent (Inspired by Eka Wahyu Portfolio)
+function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
+  const containerRef = useRef(null);
+  const cardsRef = useRef([]);
+  const currentPosRef = useRef(0);
+  const targetPosRef = useRef(0);
+  const cardWidthPxRef = useRef(0);
+  const animFrameRef = useRef(null);
+  const autoPlayTimerRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef(0);
+  const pointerInfoRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const total = items.length;
+  const rotate = 38;
+  const depth = 0.75;
+  const gap = 0.06;
+  const falloff = 0.58;
+  const fade = 0.16;
+  const loop = total > 3;
+
+  const normalizeIndex = (pos) => {
+    if (total === 0) return 0;
+    return ((Math.round(pos) % total) + total) % total;
+  };
+
+  const updateCardTransforms = () => {
+    const cardWidth = cardWidthPxRef.current;
+    if (!cardWidth || total === 0) return;
+
+    const spacing = cardWidth * (1 + gap);
+    const activePos = currentPosRef.current;
+
+    cardsRef.current.forEach((card, idx) => {
+      if (!card) return;
+      let offset = idx - activePos;
+      if (loop) {
+        offset = ((offset % total) + total) % total;
+        if (offset > total / 2) offset -= total;
+      }
+      const absOffset = Math.abs(offset);
+      const falloffDist = Math.pow(absOffset, falloff);
+      const rotation = Math.min(rotate * falloffDist, 82) * Math.sign(offset);
+      const zDepth = -depth * cardWidth * falloffDist;
+      const xOffset = offset * spacing;
+
+      card.style.transform = `translateX(calc(-50% + ${xOffset}px)) translateZ(${zDepth}px) rotateY(${-rotation}deg)`;
+      const visibilityFactor = loop ? Math.min(1, Math.max(0, total / 2 - absOffset)) : 1;
+      card.style.opacity = String(Math.max(0, 1 - fade * absOffset) * visibilityFactor);
+      card.style.zIndex = String(100 - Math.round(absOffset));
+
+      if (absOffset < 0.5) {
+        card.classList.add("is-center");
+      } else {
+        card.classList.remove("is-center");
+      }
+    });
+  };
+
+  const glideTo = (target) => {
+    if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    targetPosRef.current = target;
+    setActiveIndex(normalizeIndex(target));
+
+    const step = () => {
+      const diff = target - currentPosRef.current;
+      if (Math.abs(diff) < 0.0004) {
+        currentPosRef.current = target;
+        updateCardTransforms();
+        animFrameRef.current = null;
+        return;
+      }
+      currentPosRef.current += diff * 0.18;
+      updateCardTransforms();
+      animFrameRef.current = requestAnimationFrame(step);
+    };
+    animFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const resetAutoplay = () => {
+    if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    autoPlayTimerRef.current = setInterval(() => {
+      if (!isDraggingRef.current && total > 1) {
+        glideTo(targetPosRef.current + 1);
+      }
+    }, 5500);
+  };
+
+  // Pointer Drag Handlers with momentum
+  const handlePointerDown = (e) => {
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    e.currentTarget.setPointerCapture(e.pointerId);
+    targetPosRef.current = currentPosRef.current;
+    isDraggingRef.current = false;
+    dragStartRef.current = e.clientX;
+    pointerInfoRef.current = {
+      id: e.pointerId,
+      startX: e.clientX,
+      startPos: currentPosRef.current,
+      velocity: 0,
+      lastTime: performance.now(),
+      targetEl: e.target,
+    };
+    resetAutoplay();
+  };
+
+  const handlePointerMove = (e) => {
+    const info = pointerInfoRef.current;
+    if (!info || info.id !== e.pointerId) return;
+
+    const diffX = e.clientX - dragStartRef.current;
+    if (Math.abs(diffX) > 6) {
+      isDraggingRef.current = true;
+    }
+
+    const cardWidth = cardWidthPxRef.current * (1 + gap);
+    if (!cardWidth) return;
+
+    const now = performance.now();
+    const prevPos = currentPosRef.current;
+    currentPosRef.current = info.startPos - (e.clientX - info.startX) / cardWidth;
+    info.velocity = ((currentPosRef.current - prevPos) / Math.max(now - info.lastTime, 1)) * 1000;
+    info.lastTime = now;
+
+    const normalized = normalizeIndex(currentPosRef.current);
+    if (normalized !== activeIndex) {
+      setActiveIndex(normalized);
+    }
+    updateCardTransforms();
+  };
+
+  const handlePointerUp = (e) => {
+    const info = pointerInfoRef.current;
+    if (!info || info.id !== e.pointerId) return;
+    pointerInfoRef.current = null;
+
+    if (!isDraggingRef.current && info.targetEl) {
+      const clickedCard = info.targetEl.closest(".coverflow-card");
+      if (clickedCard) {
+        const cardIndex = cardsRef.current.indexOf(clickedCard);
+        if (cardIndex !== -1 && total > 0) {
+          const currentRound = Math.round(currentPosRef.current);
+          const currentMod = ((currentRound % total) + total) % total;
+          let delta = cardIndex - currentMod;
+          if (loop) {
+            if (delta > total / 2) delta -= total;
+            else if (delta < -total / 2) delta += total;
+          }
+
+          if (delta !== 0) {
+            glideTo(currentRound + delta);
+            return;
+          } else {
+            onSelectPhoto(items[cardIndex]);
+            return;
+          }
+        }
+      }
+    }
+
+    const inertia = Math.max(-2, Math.min(2, info.velocity * 0.16));
+    glideTo(Math.round(currentPosRef.current + inertia));
+    resetAutoplay();
+  };
+
+  // Wheel horizontal navigation
+  const handleWheel = (e) => {
+    const cardWidth = cardWidthPxRef.current * (1 + gap);
+    if (!cardWidth) return;
+
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(delta) < 8) return;
+
+    currentPosRef.current += (delta / cardWidth) * 0.75;
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    setActiveIndex(normalizeIndex(currentPosRef.current));
+    updateCardTransforms();
+
+    clearTimeout(containerRef.current?.wheelTimer);
+    containerRef.current.wheelTimer = setTimeout(() => {
+      glideTo(Math.round(currentPosRef.current));
+    }, 120);
+  };
+
+  // Keyboard navigation
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      glideTo(Math.round(targetPosRef.current) - 1);
+      resetAutoplay();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      glideTo(Math.round(targetPosRef.current) + 1);
+      resetAutoplay();
+    }
+  };
+
+  // Layout & Resize observer
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const measure = () => {
+      if (total === 0) return;
+      const first = cardsRef.current[0];
+      if (first) {
+        cardWidthPxRef.current = first.offsetWidth;
+        updateCardTransforms();
+      }
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+
+    resetAutoplay();
+
+    return () => {
+      ro.disconnect();
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    };
+  }, [total]);
+
+  const activeItem = items[activeIndex] || items[0];
+
+  return (
+    <div className="coverflow-wrapper">
+      {/* 3D Viewport Stage */}
+      <div
+        ref={containerRef}
+        className="coverflow-stage"
+        tabIndex={0}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onWheel={handleWheel}
+        onKeyDown={handleKeyDown}
+        aria-label="3D Coverflow Documentation Carousel"
+        role="region"
+      >
+        <div className="coverflow-track">
+          {items.map((item, idx) => {
+            const title = isId ? item.titleId : item.titleEn;
+            const category = isId ? item.categoryId : item.categoryEn;
+
+            return (
+              <div
+                key={item.id}
+                ref={(el) => (cardsRef.current[idx] = el)}
+                className="coverflow-card"
+                role="group"
+                aria-label={`Slide ${idx + 1} of ${total}: ${title}`}
+              >
+                <div className="coverflow-card-inner">
+                  <Image
+                    src={item.src}
+                    alt={title}
+                    fill
+                    sizes="(max-width: 768px) 300px, 420px"
+                    draggable={false}
+                    className="coverflow-img"
+                    style={{
+                      objectFit: "cover",
+                      objectPosition: item.objectPosition || "center",
+                    }}
+                  />
+                  <div className="coverflow-card-glass">
+                    <span className="coverflow-pill">{category.split("&")[0].trim()}</span>
+                    <h4 className="coverflow-card-title">{title}</h4>
+                  </div>
+                  <div className="coverflow-center-indicator">
+                    <span>🔍 {isId ? "Buka Detail" : "Inspect"}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Floating Navigation Controls */}
+        <button
+          type="button"
+          className="coverflow-nav-btn coverflow-prev"
+          onClick={() => {
+            glideTo(Math.round(targetPosRef.current) - 1);
+            resetAutoplay();
+          }}
+          aria-label="Foto Sebelumnya"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          className="coverflow-nav-btn coverflow-next"
+          onClick={() => {
+            glideTo(Math.round(targetPosRef.current) + 1);
+            resetAutoplay();
+          }}
+          aria-label="Foto Selanjutnya"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Active Slide Telemetry Inspector Banner */}
+      {activeItem && (
+        <div className="coverflow-active-telemetry panel">
+          <div className="coverflow-active-header">
+            <div className="coverflow-active-meta">
+              <span className="gallery-category">
+                {isId ? activeItem.categoryId : activeItem.categoryEn}
+              </span>
+              <span className="coverflow-slide-counter">
+                {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+              </span>
+            </div>
+            <h3 className="coverflow-active-title">
+              {isId ? activeItem.titleId : activeItem.titleEn}
+            </h3>
+            <p className="coverflow-active-desc">
+              {isId ? activeItem.descId : activeItem.descEn}
+            </p>
+            <div className="gallery-tags">
+              {activeItem.tags.map((tag) => (
+                <span key={tag} className="tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="coverflow-active-actions">
+            <button
+              type="button"
+              className="btn btn-primary coverflow-inspect-btn"
+              onClick={() => onSelectPhoto(activeItem)}
+            >
+              🔍 {isId ? "Periksa Telemetri Resolusi Penuh" : "Inspect Full Telemetry"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [activeFilter, setActiveFilter] = useState("semua");
+  const [viewMode, setViewMode] = useState("coverflow"); // "coverflow" | "grid"
   const { lang, t } = useLanguage();
   const isId = lang === "id";
 
@@ -228,77 +583,105 @@ export default function Gallery() {
           </div>
         </div>
 
-        {/* Filter Category Pills */}
-        <div className="gallery-filter-bar">
-          {categories.map((cat) => (
+        {/* View Mode Switcher (3D Coverflow vs Grid) & Category Pills */}
+        <div className="gallery-controls-bar">
+          <div className="gallery-view-toggle">
             <button
-              key={cat.id}
               type="button"
-              className={`gallery-filter-btn ${
-                activeFilter === cat.id ? "is-active" : ""
-              }`}
-              onClick={() => setActiveFilter(cat.id)}
+              className={`gallery-view-tab ${viewMode === "coverflow" ? "is-active" : ""}`}
+              onClick={() => setViewMode("coverflow")}
             >
-              <span>{cat.label}</span>
-              <small>({cat.count})</small>
+              🎴 3D Coverflow
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              className={`gallery-view-tab ${viewMode === "grid" ? "is-active" : ""}`}
+              onClick={() => setViewMode("grid")}
+            >
+              ▦ Grid Telemetri
+            </button>
+          </div>
 
-        {/* Gallery Grid */}
-        <div className="gallery-grid">
-          {filteredItems.map((item, idx) => {
-            const title = isId ? item.titleId : item.titleEn;
-            const category = isId ? item.categoryId : item.categoryEn;
-            const desc = isId ? item.descId : item.descEn;
-
-            return (
-              <div
-                key={item.id}
-                className={`gallery-card ${
-                  activeFilter === "semua" && idx === 0 ? "gallery-card-lg" : ""
+          <div className="gallery-filter-bar">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={`gallery-filter-btn ${
+                  activeFilter === cat.id ? "is-active" : ""
                 }`}
-                onClick={() => setSelectedPhoto(item)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && setSelectedPhoto(item)}
-                aria-label={`Buka foto ${title}`}
+                onClick={() => setActiveFilter(cat.id)}
               >
-                <div className="gallery-img-wrap">
-                  <Image
-                    src={item.src}
-                    alt={title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    style={{
-                      objectFit: "cover",
-                      objectPosition: item.objectPosition || "center",
-                    }}
-                  />
-                  <div className="gallery-overlay">
-                    <span className="gallery-zoom-icon">
-                      🔍 {isId ? "KLIK UNTUK DETAIL" : "CLICK TO INSPECT"}
-                    </span>
-                  </div>
-                </div>
-                <div className="gallery-info">
-                  <span className="gallery-category">{category}</span>
-                  <h3>{title}</h3>
-                  <p>{desc}</p>
-                  <div className="gallery-tags">
-                    {item.tags.map((tag) => (
-                      <span key={tag} className="tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                <span>{cat.label}</span>
+                <small>({cat.count})</small>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Lightbox Modal */}
+        {/* Display either 3D Coverflow Carousel or Multi-Card Grid */}
+        {viewMode === "coverflow" ? (
+          <CoverFlowCarousel
+            key={activeFilter}
+            items={filteredItems}
+            onSelectPhoto={setSelectedPhoto}
+            isId={isId}
+          />
+        ) : (
+          <div className="gallery-grid">
+            {filteredItems.map((item, idx) => {
+              const title = isId ? item.titleId : item.titleEn;
+              const category = isId ? item.categoryId : item.categoryEn;
+              const desc = isId ? item.descId : item.descEn;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`gallery-card ${
+                    activeFilter === "semua" && idx === 0 ? "gallery-card-lg" : ""
+                  }`}
+                  onClick={() => setSelectedPhoto(item)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === "Enter" && setSelectedPhoto(item)}
+                  aria-label={`Buka foto ${title}`}
+                >
+                  <div className="gallery-img-wrap">
+                    <Image
+                      src={item.src}
+                      alt={title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      style={{
+                        objectFit: "cover",
+                        objectPosition: item.objectPosition || "center",
+                      }}
+                    />
+                    <div className="gallery-overlay">
+                      <span className="gallery-zoom-icon">
+                        🔍 {isId ? "KLIK UNTUK DETAIL" : "CLICK TO INSPECT"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="gallery-info">
+                    <span className="gallery-category">{category}</span>
+                    <h3>{title}</h3>
+                    <p>{desc}</p>
+                    <div className="gallery-tags">
+                      {item.tags.map((tag) => (
+                        <span key={tag} className="tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Full Telemetry Lightbox Modal */}
         {selectedPhoto && (
           <div
             className="gallery-modal-backdrop"
@@ -324,8 +707,8 @@ export default function Gallery() {
                 <Image
                   src={selectedPhoto.src}
                   alt={isId ? selectedPhoto.titleId : selectedPhoto.titleEn}
-                  width={900}
-                  height={600}
+                  width={960}
+                  height={640}
                   style={{
                     width: "100%",
                     height: "auto",
@@ -335,9 +718,14 @@ export default function Gallery() {
                 />
               </div>
               <div className="gallery-modal-body">
-                <span className="gallery-category">
-                  {isId ? selectedPhoto.categoryId : selectedPhoto.categoryEn}
-                </span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <span className="gallery-category">
+                    {isId ? selectedPhoto.categoryId : selectedPhoto.categoryEn}
+                  </span>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--teal)" }}>
+                    ID #{String(selectedPhoto.id).padStart(2, "0")}
+                  </span>
+                </div>
                 <h3>{isId ? selectedPhoto.titleId : selectedPhoto.titleEn}</h3>
                 <p>{isId ? selectedPhoto.descId : selectedPhoto.descEn}</p>
                 <div className="gallery-tags">
