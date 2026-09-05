@@ -310,27 +310,35 @@ function ParticleText() {
     octx.textAlign = "center";
     octx.textBaseline = "middle";
 
-    const scale = Math.min(1, w / 760);
-    const fontTop = Math.max(26, Math.round(48 * scale));
-    const fontBottom = Math.max(34, Math.round(62 * scale));
+    // Text center placed comfortably in upper-middle area (around 38% from top)
+    const textCenterY = Math.round(h * 0.38);
 
-    // Top text: "Welcome To My" with clean white-to-teal gradient
+    // Responsive font calculations: "Portofolio Website" (18 chars, ~10.8 * fontSize) fits in 82% width
+    const maxFontForWidth = Math.floor((w * 0.82) / 10.8);
+    const maxFontForHeight = Math.floor(h * 0.08);
+    const fontBottom = Math.max(18, Math.min(52, Math.min(maxFontForWidth, maxFontForHeight)));
+    const fontTop = Math.max(14, Math.round(fontBottom * 0.72));
+
+    const topY = textCenterY - Math.round(fontTop * 0.75);
+    const bottomY = textCenterY + Math.round(fontBottom * 0.75);
+
+    // Top text: "Welcome To My"
     octx.font = `bold ${fontTop}px 'Space Grotesk', system-ui, sans-serif`;
-    const gradTop = octx.createLinearGradient(w / 2 - 200, 0, w / 2 + 200, 0);
+    const gradTop = octx.createLinearGradient(w / 2 - 180, 0, w / 2 + 180, 0);
     gradTop.addColorStop(0, "#FFFFFF");
     gradTop.addColorStop(0.5, "#E2E8F0");
     gradTop.addColorStop(1, "#A7F3D0");
     octx.fillStyle = gradTop;
-    octx.fillText("Welcome To My", w / 2, h / 2 - fontTop * 0.72);
+    octx.fillText("Welcome To My", Math.round(w / 2), topY);
 
-    // Bottom text: "Portofolio Website" with vibrant glowing cyan/teal
+    // Bottom text: "Portofolio Website"
     octx.font = `800 ${fontBottom}px 'Space Grotesk', system-ui, sans-serif`;
-    const gradBottom = octx.createLinearGradient(w / 2 - 240, 0, w / 2 + 240, 0);
+    const gradBottom = octx.createLinearGradient(w / 2 - 220, 0, w / 2 + 220, 0);
     gradBottom.addColorStop(0, "#38BDF8");
     gradBottom.addColorStop(0.5, "#4FD1C5");
     gradBottom.addColorStop(1, "#2DD4BF");
     octx.fillStyle = gradBottom;
-    octx.fillText("Portofolio Website", w / 2, h / 2 + fontBottom * 0.72);
+    octx.fillText("Portofolio Website", Math.round(w / 2), bottomY);
 
     const imgData = octx.getImageData(0, 0, w, h).data;
     const particles = particlesRef.current;
@@ -356,7 +364,7 @@ function ParticleText() {
       const ty = Math.floor(c / 4 / w);
 
       const p = new TextParticle();
-      const origin = spawnRandomPos(w / 2, h / 2, radius, w, h);
+      const origin = spawnRandomPos(w / 2, textCenterY, radius, w, h);
       p.pos.x = origin.x;
       p.pos.y = origin.y;
       p.target.x = tx;
@@ -385,13 +393,13 @@ function ParticleText() {
     if (!canvas) return;
 
     const handleResize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth);
-      const h = window.innerHeight;
-      canvas.width = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
-      const ctx = canvas.getContext("2d");
-      ctx.scale(dpr, dpr);
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.round(rect.width || window.innerWidth || 800);
+      const h = Math.round(rect.height || window.innerHeight || 600);
+      if (w === 0 || h === 0) return;
+
+      canvas.width = w;
+      canvas.height = h;
       setupParticles(canvas, w, h);
     };
 
@@ -405,8 +413,8 @@ function ParticleText() {
       }
 
       const ctx = canvas.getContext("2d");
-      const w = canvas.clientWidth || window.innerWidth;
-      const h = canvas.clientHeight || window.innerHeight;
+      const w = canvas.width;
+      const h = canvas.height;
       const particles = particlesRef.current;
 
       ctx.clearRect(0, 0, w, h);
@@ -452,6 +460,8 @@ function ParticleText() {
       style={{
         position: "absolute",
         inset: 0,
+        width: "100%",
+        height: "100%",
         pointerEvents: "none",
         zIndex: 2,
         willChange: "transform",
@@ -625,15 +635,18 @@ export default function Preloader() {
       {/* Layer 3: Foreground UI (Loading Bar & Network Engineer Subtitle) */}
       <div
         style={{
-          position: "relative",
+          position: "absolute",
+          bottom: "clamp(24px, 7vh, 60px)",
+          left: 0,
+          right: 0,
           zIndex: 10,
-          marginTop: "clamp(220px, 32vh, 320px)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "20px",
+          gap: "14px",
           width: "100%",
           padding: "0 20px",
+          boxSizing: "border-box",
         }}
       >
         <LoadingProgressBar progress={count} />

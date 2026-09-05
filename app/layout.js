@@ -47,7 +47,10 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id">
+    <html lang="id" className="notranslate" translate="no">
+      <head>
+        <meta name="google" content="notranslate" />
+      </head>
       <body>{children}</body>
     </html>
   );
