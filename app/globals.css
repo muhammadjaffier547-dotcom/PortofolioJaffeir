@@ -1276,24 +1276,27 @@ section + section::before{
 
 .coverflow-wrapper{
   width:100%;
+  max-width:100%;
   position:relative;
   display:flex;
   flex-direction:column;
   align-items:center;
   margin-bottom:28px;
+  overflow:hidden;
 }
 .coverflow-stage{
   position:relative;
   width:100%;
-  padding:40px 0 50px;
-  perspective:1200px;
+  max-width:100%;
+  padding:30px 0 40px;
+  perspective:1100px;
   transform-style:preserve-3d;
   cursor:grab;
   user-select:none;
   outline:none;
   touch-action:pan-y;
-  overflow:visible;
-  min-height:440px;
+  overflow:hidden;
+  min-height:calc(var(--cf-card, 320px) + 70px);
   display:flex;
   justify-content:center;
   align-items:center;
@@ -1304,18 +1307,18 @@ section + section::before{
 .coverflow-track{
   position:relative;
   width:100%;
-  height:clamp(260px, 32vw, 400px);
+  height:var(--cf-card, 320px);
   transform-style:preserve-3d;
-  display:flex;
-  justify-content:center;
-  align-items:center;
 }
 .coverflow-card{
   position:absolute;
   left:50%;
   top:0;
-  width:clamp(260px, 30vw, 390px);
-  height:clamp(260px, 32vw, 400px);
+  width:var(--cf-card, 320px);
+  height:var(--cf-card, 320px);
+  max-width:88vw;
+  max-height:88vw;
+  aspect-ratio:1/1;
   transform-origin:center center;
   will-change:transform, opacity;
   transition:box-shadow .35s ease, border-color .35s ease;

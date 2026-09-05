@@ -199,13 +199,13 @@ const GALLERY_ITEMS = [
   },
 ];
 
-// 3D Cover Flow Carousel Subcomponent (Inspired by Eka Wahyu Portfolio)
+// 3D Cover Flow Carousel Subcomponent (Perfected 3D Perspective & Drag Gesture)
 function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   const containerRef = useRef(null);
   const cardsRef = useRef([]);
   const currentPosRef = useRef(0);
   const targetPosRef = useRef(0);
-  const cardWidthPxRef = useRef(0);
+  const cardWidthRef = useRef(320);
   const animFrameRef = useRef(null);
   const autoPlayTimerRef = useRef(null);
   const isDraggingRef = useRef(false);
@@ -214,11 +214,11 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const total = items.length;
-  const rotate = 38;
-  const depth = 0.75;
-  const gap = 0.06;
-  const falloff = 0.58;
-  const fade = 0.16;
+  const rotate = 40;
+  const depth = 0.7;
+  const gap = 0.05;
+  const falloff = 0.56;
+  const fade = 0.15;
   const loop = total > 3;
 
   const normalizeIndex = (pos) => {
@@ -226,32 +226,42 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     return ((Math.round(pos) % total) + total) % total;
   };
 
-  const updateCardTransforms = () => {
-    const cardWidth = cardWidthPxRef.current;
-    if (!cardWidth || total === 0) return;
+  const updateTransforms = () => {
+    const cardWidth = cardWidthRef.current || 320;
+    if (total === 0) return;
 
     const spacing = cardWidth * (1 + gap);
     const activePos = currentPosRef.current;
 
     cardsRef.current.forEach((card, idx) => {
       if (!card) return;
-      let offset = idx - activePos;
+      let u = idx - activePos;
       if (loop) {
-        offset = ((offset % total) + total) % total;
-        if (offset > total / 2) offset -= total;
+        u = ((u % total) + total) % total;
+        if (u > total / 2) u -= total;
       }
-      const absOffset = Math.abs(offset);
-      const falloffDist = Math.pow(absOffset, falloff);
-      const rotation = Math.min(rotate * falloffDist, 82) * Math.sign(offset);
-      const zDepth = -depth * cardWidth * falloffDist;
-      const xOffset = offset * spacing;
+      const absU = Math.abs(u);
+
+      // Hide distant cards beyond 3.5 steps to completely prevent horizontal viewport blowout
+      if (absU > 3.6) {
+        card.style.visibility = "hidden";
+        card.style.pointerEvents = "none";
+        return;
+      }
+      card.style.visibility = "visible";
+      card.style.pointerEvents = "auto";
+
+      const d = Math.pow(absU, falloff);
+      const rotation = Math.min(rotate * d, 82) * Math.sign(u);
+      const zDepth = -depth * cardWidth * d;
+      const xOffset = u * spacing;
 
       card.style.transform = `translateX(calc(-50% + ${xOffset}px)) translateZ(${zDepth}px) rotateY(${-rotation}deg)`;
-      const visibilityFactor = loop ? Math.min(1, Math.max(0, total / 2 - absOffset)) : 1;
-      card.style.opacity = String(Math.max(0, 1 - fade * absOffset) * visibilityFactor);
-      card.style.zIndex = String(100 - Math.round(absOffset));
+      const loopFactor = loop ? Math.min(1, Math.max(0, total / 2 - absU)) : 1;
+      card.style.opacity = String(Math.max(0, 1 - fade * absU) * loopFactor);
+      card.style.zIndex = String(100 - Math.round(absU));
 
-      if (absOffset < 0.5) {
+      if (absU < 0.5) {
         card.classList.add("is-center");
       } else {
         card.classList.remove("is-center");
@@ -260,7 +270,10 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   };
 
   const glideTo = (target) => {
-    if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
     targetPosRef.current = target;
     setActiveIndex(normalizeIndex(target));
 
@@ -268,12 +281,12 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       const diff = target - currentPosRef.current;
       if (Math.abs(diff) < 0.0004) {
         currentPosRef.current = target;
-        updateCardTransforms();
+        updateTransforms();
         animFrameRef.current = null;
         return;
       }
-      currentPosRef.current += diff * 0.18;
-      updateCardTransforms();
+      currentPosRef.current += diff * 0.16;
+      updateTransforms();
       animFrameRef.current = requestAnimationFrame(step);
     };
     animFrameRef.current = requestAnimationFrame(step);
@@ -313,12 +326,11 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     const info = pointerInfoRef.current;
     if (!info || info.id !== e.pointerId) return;
 
-    const diffX = e.clientX - dragStartRef.current;
-    if (Math.abs(diffX) > 6) {
+    if (Math.abs(e.clientX - dragStartRef.current) > 5) {
       isDraggingRef.current = true;
     }
 
-    const cardWidth = cardWidthPxRef.current * (1 + gap);
+    const cardWidth = (cardWidthRef.current || 320) * (1 + gap);
     if (!cardWidth) return;
 
     const now = performance.now();
@@ -331,7 +343,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     if (normalized !== activeIndex) {
       setActiveIndex(normalized);
     }
-    updateCardTransforms();
+    updateTransforms();
   };
 
   const handlePointerUp = (e) => {
@@ -363,14 +375,14 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       }
     }
 
-    const inertia = Math.max(-2, Math.min(2, info.velocity * 0.16));
+    const inertia = Math.max(-2, Math.min(2, (info.velocity || 0) * 0.16));
     glideTo(Math.round(currentPosRef.current + inertia));
     resetAutoplay();
   };
 
   // Wheel horizontal navigation
   const handleWheel = (e) => {
-    const cardWidth = cardWidthPxRef.current * (1 + gap);
+    const cardWidth = (cardWidthRef.current || 320) * (1 + gap);
     if (!cardWidth) return;
 
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
@@ -382,7 +394,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       animFrameRef.current = null;
     }
     setActiveIndex(normalizeIndex(currentPosRef.current));
-    updateCardTransforms();
+    updateTransforms();
 
     clearTimeout(containerRef.current?.wheelTimer);
     containerRef.current.wheelTimer = setTimeout(() => {
@@ -411,10 +423,13 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     const measure = () => {
       if (total === 0) return;
       const first = cardsRef.current[0];
-      if (first) {
-        cardWidthPxRef.current = first.offsetWidth;
-        updateCardTransforms();
+      if (first && first.offsetWidth > 0) {
+        cardWidthRef.current = first.offsetWidth;
+      } else {
+        const sw = window.innerWidth;
+        cardWidthRef.current = Math.min(380, Math.max(250, sw * 0.28));
       }
+      updateTransforms();
     };
 
     measure();
@@ -433,7 +448,12 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   const activeItem = items[activeIndex] || items[0];
 
   return (
-    <div className="coverflow-wrapper">
+    <div
+      className="coverflow-wrapper"
+      style={{
+        "--cf-card": "clamp(250px, 30vw, 380px)",
+      }}
+    >
       {/* 3D Viewport Stage */}
       <div
         ref={containerRef}
@@ -491,7 +511,8 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         <button
           type="button"
           className="coverflow-nav-btn coverflow-prev"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             glideTo(Math.round(targetPosRef.current) - 1);
             resetAutoplay();
           }}
@@ -502,7 +523,8 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         <button
           type="button"
           className="coverflow-nav-btn coverflow-next"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             glideTo(Math.round(targetPosRef.current) + 1);
             resetAutoplay();
           }}
