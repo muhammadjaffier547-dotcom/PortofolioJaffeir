@@ -101,18 +101,32 @@ function HolographicCard({ cert, isId, onSelect }) {
         {/* Body Info */}
         <div className="holo-body">
           <div className="holo-icon-wrap" style={{ color: cert.badgeColor }}>
-            <span className="holo-cert-emoji">{cert.icon}</span>
+            {cert.badgeImage ? (
+              <img
+                src={cert.badgeImage}
+                alt={cert.name}
+                className="holo-badge-img"
+                loading="lazy"
+              />
+            ) : (
+              <span className="holo-cert-emoji">{cert.icon}</span>
+            )}
           </div>
           <h3 className="holo-title">{cert.name}</h3>
           <p className="holo-issuer">
             <span>{cert.issuer}</span> &middot; {cert.issuerLocation}
           </p>
+          {cert.recipient && (
+            <p className="holo-recipient">
+              {isId ? "Penerima:" : "Earner:"} <strong>{cert.recipient}</strong>
+            </p>
+          )}
         </div>
 
         {/* Credential ID Bar */}
         <div className="holo-id-bar">
           <span className="holo-id-lbl">{isId ? "ID KREDENSIAL" : "CREDENTIAL ID"}</span>
-          <code className="holo-id-val">{cert.id}</code>
+          <code className="holo-id-val">{cert.id.length > 20 ? `${cert.id.slice(0, 16)}...` : cert.id}</code>
         </div>
 
         {/* Footer Actions */}
@@ -155,12 +169,12 @@ export default function Certification() {
             <h2 className="sectitle">{t("cert_title")}</h2>
             <p className="section-note">
               {isId
-                ? "Sertifikasi resmi keahlian jaringan, routing RouterOS, infrastruktur fiber optik, dan switching enterprise."
-                : "Official credentials in network routing, RouterOS architecture, optical fiber infrastructure, and enterprise switching."}
+                ? "Kredensial resmi terverifikasi mencakup routing MikroTik RouterOS dan arsitektur komputasi awan AWS (Amazon Web Services)."
+                : "Verified official credentials covering MikroTik RouterOS network routing and Amazon Web Services (AWS) cloud architecture."}
             </p>
           </div>
           <div className="cert-meta-tag">
-            <span className="cert-meta-num">03</span>
+            <span className="cert-meta-num">{String(certList.length).padStart(2, "0")}</span>
             <span className="cert-meta-lbl">{isId ? "SERTIFIKASI TERVALIDASI" : "VERIFIED CERTS"}</span>
           </div>
         </div>
@@ -210,7 +224,15 @@ export default function Certification() {
                     className="cert-modal-icon"
                     style={{ borderColor: `${selectedCert.badgeColor}66`, background: `${selectedCert.badgeColor}15` }}
                   >
-                    <span style={{ fontSize: "28px" }}>{selectedCert.icon}</span>
+                    {selectedCert.badgeImage ? (
+                      <img
+                        src={selectedCert.badgeImage}
+                        alt={selectedCert.name}
+                        className="holo-modal-badge-img"
+                      />
+                    ) : (
+                      <span style={{ fontSize: "28px" }}>{selectedCert.icon}</span>
+                    )}
                   </div>
                   <div>
                     <span
@@ -226,6 +248,12 @@ export default function Certification() {
                       {isId ? "Lembaga Penerbit:" : "Issuing Body:"}{" "}
                       <strong>{selectedCert.issuer}</strong> ({selectedCert.issuerLocation})
                     </p>
+                    {selectedCert.recipient && (
+                      <p className="modal-recipient-tag">
+                        {isId ? "Penerima Kredensial:" : "Issued to:"}{" "}
+                        <strong style={{ color: selectedCert.badgeColor }}>{selectedCert.recipient}</strong>
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -270,9 +298,11 @@ export default function Certification() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-ghost cert-verify-btn"
-                    style={{ borderColor: `${selectedCert.badgeColor}55` }}
+                    style={{ borderColor: `${selectedCert.badgeColor}55`, color: selectedCert.badgeColor }}
                   >
-                    🔍 {isId ? `Verifikasi di Portal ${selectedCert.issuer.split(" ")[0]} ↗` : `Verify on ${selectedCert.issuer.split(" ")[0]} Portal ↗`}
+                    🔍 {selectedCert.verifyUrl.includes("credly")
+                      ? (isId ? "Verifikasi di Portal Credly ↗" : "Verify on Credly Official Portal ↗")
+                      : (isId ? `Verifikasi di Portal ${selectedCert.issuer.split(" ")[0]} ↗` : `Verify on ${selectedCert.issuer.split(" ")[0]} Portal ↗`)}
                   </a>
                   <button
                     className="btn btn-primary"
