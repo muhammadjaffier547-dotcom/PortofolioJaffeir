@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// WebGL Electric Plasma Beam Background Shader (GPU Accelerated)
-function PlasmaShader({ hue = 185, speed = 1.4, intensity = 1.1, size = 1.8 }) {
+// WebGL Fiber Optic Laser Waveguide & Quantum Lightwave Conduit (GPU-Accelerated)
+function FiberOpticShader({ speed = 1.3, intensity = 1.15 }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -41,75 +41,48 @@ function PlasmaShader({ hue = 185, speed = 1.4, intensity = 1.1, size = 1.8 }) {
       precision mediump float;
       uniform vec2 iResolution;
       uniform float iTime;
-      uniform float uHue;
       uniform float uSpeed;
       uniform float uIntensity;
-      uniform float uSize;
-      #define OCTAVE_COUNT 8
-      vec3 hsv2rgb(vec3 c) {
-          vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-          return c.z * mix(vec3(1.0), rgb, c.y);
-      }
-      float hash11(float p) {
-          p = fract(p * .1031);
-          p *= p + 33.33;
-          p *= p + p;
-          return fract(p);
-      }
-      float hash12(vec2 p) {
-          vec3 p3 = fract(vec3(p.xyx) * .1031);
-          p3 += dot(p3, p3.yzx + 33.33);
-          return fract((p3.x + p3.y) * p3.z);
-      }
-      mat2 rotate2d(float theta) {
-          float c = cos(theta);
-          float s = sin(theta);
-          return mat2(c, -s, s, c);
-      }
-      float noise(vec2 p) {
-          vec2 ip = floor(p);
-          vec2 fp = fract(p);
-          float a = hash12(ip);
-          float b = hash12(ip + vec2(1.0, 0.0));
-          float c = hash12(ip + vec2(0.0, 1.0));
-          float d = hash12(ip + vec2(1.0, 1.0));
-          vec2 t = smoothstep(0.0, 1.0, fp);
-          return mix(mix(a, b, t.x), mix(c, d, t.x), t.y);
-      }
-      float fbm(vec2 p) {
-          float value = 0.0;
-          float amplitude = 0.5;
-          for (int i = 0; i < OCTAVE_COUNT; ++i) {
-              value += amplitude * noise(p);
-              p *= rotate2d(0.45);
-              p *= 2.0;
-              amplitude *= 0.5;
-          }
-          return value;
-      }
+
       void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-        vec2 uv = fragCoord / iResolution.xy;
-        uv = 2.0 * uv - 1.0;
-        float aspect = iResolution.x / iResolution.y;
-        uv.x *= aspect;
-        
-        float path = sin(uv.y * 2.8 - iTime * 2.2) * 0.22 
-                   + sin(uv.y * 4.6 + iTime * 1.3) * 0.12;
-        
-        vec2 noiseUv = uv * uSize * 1.4;
-        float n = 2.0 * fbm(noiseUv + 1.1 * iTime * uSpeed) - 1.0;
-        
-        float scale = aspect < 1.0 ? (aspect * 1.1) : 1.0;
-        float center = (path + n * 0.35) * scale;
-        
-        uv.y += n * 0.18 * scale;
-        float dist = abs(uv.x - center);
-        
-        vec3 baseColor = hsv2rgb(vec3(uHue / 360.0, 0.75, 0.85));
-        vec3 col = baseColor * pow(mix(0.0, 0.065, hash11(iTime * uSpeed)) / max(dist, 0.001), 1.0) * uIntensity;
-        float alpha = clamp(max(col.r, max(col.g, col.b)) * 1.2, 0.0, 1.0);
-        fragColor = vec4(col, alpha);
+        vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
+
+        // Dual Fiber Optic Laser Waveguides
+        float path1 = sin(uv.x * 2.2 + iTime * uSpeed * 1.4) * 0.16 
+                    + sin(uv.x * 4.6 - iTime * uSpeed * 1.8) * 0.08
+                    + cos(uv.x * 1.3 + iTime * 0.8) * 0.05;
+        float d1 = abs(uv.y - path1);
+
+        float path2 = -sin(uv.x * 2.5 - iTime * uSpeed * 1.6) * 0.18 
+                    + cos(uv.x * 5.0 + iTime * uSpeed * 1.9) * 0.07;
+        float d2 = abs(uv.y - path2);
+
+        // High-speed photon energy bursts traveling down fiber conduits
+        float packet1 = pow(clamp(1.0 - abs(mod(uv.x * 2.6 - iTime * uSpeed * 3.2, 4.0) - 2.0), 0.0, 1.0), 4.5);
+        float packet2 = pow(clamp(1.0 - abs(mod(uv.x * 3.0 + iTime * uSpeed * 3.6, 4.5) - 2.25), 0.0, 1.0), 4.5);
+
+        // Optical Laser Color Palette: Electric Teal (#4FD1C5), Optical Cyan (#38BDF8), White Photon Core
+        vec3 colTeal = vec3(0.31, 0.82, 0.77);
+        vec3 colBlue = vec3(0.22, 0.74, 0.97);
+        vec3 whiteCore = vec3(0.95, 1.0, 1.0);
+
+        vec3 finalCol = vec3(0.0);
+        finalCol += colTeal * (0.019 / max(d1, 0.003)) * uIntensity;
+        finalCol += colBlue * (0.017 / max(d2, 0.003)) * uIntensity;
+
+        // High-energy packet ignition
+        finalCol += mix(colTeal, whiteCore, 0.85) * packet1 * (0.038 / max(d1, 0.004));
+        finalCol += mix(colBlue, whiteCore, 0.85) * packet2 * (0.038 / max(d2, 0.004));
+
+        // Subtle Optical Background Telemetry Grid
+        vec2 gridUv = fract(fragCoord / 42.0) - 0.5;
+        float gridDot = smoothstep(0.07, 0.02, length(gridUv)) * 0.055;
+        finalCol += vec3(0.2, 0.6, 0.7) * gridDot;
+
+        float alpha = clamp(max(finalCol.r, max(finalCol.g, finalCol.b)), 0.0, 1.0);
+        fragColor = vec4(finalCol, alpha * 0.88);
       }
+
       void main() {
         mainImage(gl_FragColor, gl_FragCoord.xy);
       }
@@ -153,10 +126,8 @@ function PlasmaShader({ hue = 185, speed = 1.4, intensity = 1.1, size = 1.8 }) {
 
     const resLoc = gl.getUniformLocation(program, "iResolution");
     const timeLoc = gl.getUniformLocation(program, "iTime");
-    const hueLoc = gl.getUniformLocation(program, "uHue");
     const speedLoc = gl.getUniformLocation(program, "uSpeed");
     const intLoc = gl.getUniformLocation(program, "uIntensity");
-    const sizeLoc = gl.getUniformLocation(program, "uSize");
 
     let animId = 0;
     let lastTime = 0;
@@ -171,10 +142,8 @@ function PlasmaShader({ hue = 185, speed = 1.4, intensity = 1.1, size = 1.8 }) {
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.uniform2f(resLoc, canvas.width, canvas.height);
           gl.uniform1f(timeLoc, (now - startTime) / 1000);
-          gl.uniform1f(hueLoc, hue);
           gl.uniform1f(speedLoc, speed);
           gl.uniform1f(intLoc, intensity);
-          gl.uniform1f(sizeLoc, size);
           gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
         animId = requestAnimationFrame(render);
@@ -196,7 +165,7 @@ function PlasmaShader({ hue = 185, speed = 1.4, intensity = 1.1, size = 1.8 }) {
       document.removeEventListener("visibilitychange", handleVisibility);
       if (animId) cancelAnimationFrame(animId);
     };
-  }, [hue, speed, intensity, size]);
+  }, [speed, intensity]);
 
   return (
     <canvas
@@ -205,31 +174,30 @@ function PlasmaShader({ hue = 185, speed = 1.4, intensity = 1.1, size = 1.8 }) {
         width: "100%",
         height: "100%",
         display: "block",
-        opacity: 0.85,
+        opacity: 0.88,
       }}
     />
   );
 }
 
-// Particle Class for Dynamic Steering & Text Assembly
-class TextParticle {
+// Particle Class for Network Constellation Node Physics & Dynamic Typography
+class NetworkNodeParticle {
   constructor() {
     this.pos = { x: 0, y: 0 };
     this.vel = { x: 0, y: 0 };
     this.acc = { x: 0, y: 0 };
     this.target = { x: 0, y: 0 };
-    this.closeEnoughTarget = 90;
-    this.maxSpeed = 12;
-    this.maxForce = 0.9;
-    this.particleSize = 2.8;
-    this.isKilled = false;
+    this.closeEnoughTarget = 85;
+    this.maxSpeed = 11;
+    this.maxForce = 0.85;
+    this.particleSize = 2.4;
     this.startColor = { r: 15, g: 23, b: 42 };
     this.targetColor = { r: 255, g: 255, b: 255 };
     this.colorWeight = 0;
     this.colorBlendRate = 0.025;
   }
 
-  move() {
+  move(pointer) {
     let proximityFactor = 1;
     const dx = this.target.x - this.pos.x;
     const dy = this.target.y - this.pos.y;
@@ -256,6 +224,20 @@ class TextParticle {
 
     this.acc.x += steerX;
     this.acc.y += steerY;
+
+    // Interactive pointer repulsion wave
+    if (pointer && pointer.x > 0 && pointer.y > 0) {
+      const pdx = this.pos.x - pointer.x;
+      const pdy = this.pos.y - pointer.y;
+      const pdist = Math.sqrt(pdx * pdx + pdy * pdy);
+      const repelRadius = 80;
+      if (pdist < repelRadius && pdist > 0) {
+        const repelForce = ((repelRadius - pdist) / repelRadius) * 4.5;
+        this.acc.x += (pdx / pdist) * repelForce;
+        this.acc.y += (pdy / pdist) * repelForce;
+      }
+    }
+
     this.vel.x += this.acc.x;
     this.vel.y += this.acc.y;
     this.pos.x += this.vel.x;
@@ -273,19 +255,18 @@ class TextParticle {
     const b = Math.round(this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight);
 
     ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-    ctx.beginPath();
-    ctx.arc(this.pos.x, this.pos.y, this.particleSize / 2, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(this.pos.x, this.pos.y, this.particleSize, this.particleSize);
   }
 }
 
-// Particle Text Assembly Canvas Component
+// Particle Canvas: Network Constellation Topology Assembling into Personal Typography
 function ParticleText() {
   const canvasRef = useRef(null);
   const animRef = useRef(null);
   const particlesRef = useRef([]);
-  const offscreenCanvasRef = useRef(null);
   const frameCountRef = useRef(0);
+  const offscreenCanvasRef = useRef(null);
+  const pointerRef = useRef({ x: -9999, y: -9999 });
 
   const spawnRandomPos = (cx, cy, radius, w, h) => {
     const rx = Math.random() * w;
@@ -313,32 +294,40 @@ function ParticleText() {
     // Text center placed comfortably in upper-middle area (around 38% from top)
     const textCenterY = Math.round(h * 0.38);
 
-    // Responsive font calculations: "Portofolio Website" (18 chars, ~10.8 * fontSize) fits in 82% width
-    const maxFontForWidth = Math.floor((w * 0.82) / 10.8);
-    const maxFontForHeight = Math.floor(h * 0.08);
-    const fontBottom = Math.max(18, Math.min(52, Math.min(maxFontForWidth, maxFontForHeight)));
-    const fontTop = Math.max(14, Math.round(fontBottom * 0.72));
+    // Responsive font calculation tailored to "MUHAMMAD JAFFIER" & "NETWORK SYSTEMS & NOC"
+    // "NETWORK SYSTEMS & NOC" (21 chars * ~0.55 = 11.5 * fontSize) guaranteed inside 82% width
+    const maxFontForWidth = Math.floor((w * 0.82) / 11.5);
+    const maxFontForHeight = Math.floor(h * 0.072);
+    const fontBottom = Math.max(16, Math.min(42, Math.min(maxFontForWidth, maxFontForHeight)));
+    const fontTop = Math.max(18, Math.min(52, Math.round(fontBottom * 1.18)));
+    const fontBadge = Math.max(9, Math.min(12, Math.round(fontBottom * 0.28)));
 
-    const topY = textCenterY - Math.round(fontTop * 0.75);
-    const bottomY = textCenterY + Math.round(fontBottom * 0.75);
+    const topY = textCenterY - Math.round(fontTop * 0.65);
+    const bottomY = textCenterY + Math.round(fontBottom * 0.65);
+    const badgeY = bottomY + Math.round(fontBottom * 0.72) + 12;
 
-    // Top text: "Welcome To My"
-    octx.font = `bold ${fontTop}px 'Space Grotesk', system-ui, sans-serif`;
-    const gradTop = octx.createLinearGradient(w / 2 - 180, 0, w / 2 + 180, 0);
+    // Line 1: "MUHAMMAD JAFFIER" (Titanium White with soft Ice-Teal gradient)
+    octx.font = `bold ${fontTop}px 'Space Grotesk', system-ui, -apple-system, sans-serif`;
+    const gradTop = octx.createLinearGradient(w / 2 - 200, 0, w / 2 + 200, 0);
     gradTop.addColorStop(0, "#FFFFFF");
-    gradTop.addColorStop(0.5, "#E2E8F0");
+    gradTop.addColorStop(0.5, "#F0FDFA");
     gradTop.addColorStop(1, "#A7F3D0");
     octx.fillStyle = gradTop;
-    octx.fillText("Welcome To My", Math.round(w / 2), topY);
+    octx.fillText("MUHAMMAD JAFFIER", Math.round(w / 2), topY);
 
-    // Bottom text: "Portofolio Website"
-    octx.font = `800 ${fontBottom}px 'Space Grotesk', system-ui, sans-serif`;
+    // Line 2: "NETWORK SYSTEMS & NOC" (Vibrant Optical Cyan/Teal Laser Gradient)
+    octx.font = `800 ${fontBottom}px 'Space Grotesk', system-ui, -apple-system, sans-serif`;
     const gradBottom = octx.createLinearGradient(w / 2 - 220, 0, w / 2 + 220, 0);
     gradBottom.addColorStop(0, "#38BDF8");
     gradBottom.addColorStop(0.5, "#4FD1C5");
     gradBottom.addColorStop(1, "#2DD4BF");
     octx.fillStyle = gradBottom;
-    octx.fillText("Portofolio Website", Math.round(w / 2), bottomY);
+    octx.fillText("NETWORK SYSTEMS & NOC", Math.round(w / 2), bottomY);
+
+    // Line 3: Professional Technical Sub-badge
+    octx.font = `600 ${fontBadge}px 'JetBrains Mono', monospace`;
+    octx.fillStyle = "rgba(148, 163, 184, 0.85)";
+    octx.fillText("[ AS23700 · MIKROTIK CCR2004 · 10G OPTICAL FIBER ]", Math.round(w / 2), badgeY);
 
     const imgData = octx.getImageData(0, 0, w, h).data;
     const particles = particlesRef.current;
@@ -363,21 +352,21 @@ function ParticleText() {
       const tx = (c / 4) % w;
       const ty = Math.floor(c / 4 / w);
 
-      const p = new TextParticle();
+      const p = new NetworkNodeParticle();
       const origin = spawnRandomPos(w / 2, textCenterY, radius, w, h);
       p.pos.x = origin.x;
       p.pos.y = origin.y;
       p.target.x = tx;
       p.target.y = ty;
-      p.maxSpeed = Math.random() * 8 + 9;
-      p.maxForce = p.maxSpeed * 0.12;
-      p.particleSize = Math.random() * 1.5 + 2.2;
-      p.colorBlendRate = Math.random() * 0.03 + 0.015;
+      p.maxSpeed = Math.random() * 7 + 8;
+      p.maxForce = p.maxSpeed * 0.11;
+      p.particleSize = Math.random() * 1.4 + 2.0;
+      p.colorBlendRate = Math.random() * 0.025 + 0.015;
 
       p.startColor = {
-        r: Math.floor(Math.random() * 40 + 20),
-        g: Math.floor(Math.random() * 80 + 40),
-        b: Math.floor(Math.random() * 100 + 80),
+        r: Math.floor(Math.random() * 30 + 15),
+        g: Math.floor(Math.random() * 70 + 35),
+        b: Math.floor(Math.random() * 95 + 75),
       };
       p.targetColor = {
         r: imgData[c],
@@ -405,6 +394,21 @@ function ParticleText() {
 
     handleResize();
 
+    const handlePointerMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      pointerRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    };
+
+    const handlePointerLeave = () => {
+      pointerRef.current = { x: -9999, y: -9999 };
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave, { passive: true });
+
     const loop = () => {
       if (!canvas) return;
       if (document.hidden) {
@@ -420,17 +424,40 @@ function ParticleText() {
       ctx.clearRect(0, 0, w, h);
       frameCountRef.current++;
 
-      // After frame 70, gradually fade into crisp typography
+      // After frame 75, gradually fade into crisp typography
       let crispBlend = 0;
-      if (frameCountRef.current > 70) {
-        crispBlend = Math.min(1, (frameCountRef.current - 70) / 45);
+      if (frameCountRef.current > 75) {
+        crispBlend = Math.min(1, (frameCountRef.current - 75) / 45);
       }
 
-      // Draw assembling particles
+      // Live Constellation Mesh: Draw faint fiber interconnect lines during swarm convergence
+      if (frameCountRef.current < 60 && particles.length > 0) {
+        ctx.strokeStyle = "rgba(79, 209, 197, 0.12)";
+        ctx.lineWidth = 0.8;
+        const checkStep = 12;
+        ctx.beginPath();
+        for (let i = 0; i < particles.length; i += checkStep) {
+          const pA = particles[i];
+          let links = 0;
+          for (let j = i + checkStep; j < particles.length && links < 3; j += checkStep) {
+            const pB = particles[j];
+            const dsq = (pA.pos.x - pB.pos.x) ** 2 + (pA.pos.y - pB.pos.y) ** 2;
+            if (dsq < 2500) { // < 50px
+              ctx.moveTo(pA.pos.x, pA.pos.y);
+              ctx.lineTo(pB.pos.x, pB.pos.y);
+              links++;
+            }
+          }
+        }
+        ctx.stroke();
+      }
+
+      // Draw assembling node particles with mouse physics
       ctx.globalAlpha = 1 - crispBlend * 0.35;
+      const pointer = pointerRef.current;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        p.move();
+        p.move(pointer);
         p.draw(ctx);
       }
       ctx.globalAlpha = 1;
@@ -451,6 +478,8 @@ function ParticleText() {
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
     };
   }, []);
 
@@ -470,83 +499,100 @@ function ParticleText() {
   );
 }
 
-// Sleek Futuristik Loading Bar
-function LoadingProgressBar({ progress }) {
+// Sleek NOC Bootloader Sequence & Live Telemetry Readout
+function NOCBootloaderBar({ progress }) {
+  // Dynamic NOC Boot Milestones
+  let bootStatus = "[SYS] PROBING SFP+ OPTICAL TRANSCEIVERS...";
+  if (progress >= 25 && progress < 55) {
+    bootStatus = "[NET] PEERING APJII OPENIXP 10G... ESTABLISHED";
+  } else if (progress >= 55 && progress < 80) {
+    bootStatus = "[NOC] SYNCING MIKROTIK CCR2004 ROUTER... OK";
+  } else if (progress >= 80 && progress < 99) {
+    bootStatus = "[LINK] 10G METROLINK TRUNK TO CYBER DC... UP";
+  } else if (progress >= 99) {
+    bootStatus = "[READY] INFRASTRUCTURE ONLINE · WELCOME";
+  }
+
   return (
     <div
       style={{
-        width: "min(320px, 86vw)",
+        width: "min(340px, 86vw)",
         margin: "0 auto",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         gap: "10px",
       }}
     >
+      {/* Live NOC Terminal Milestone */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          width: "100%",
-          padding: "0 2px",
+          gap: "8px",
           fontFamily: "var(--mono, monospace)",
-          fontSize: "12px",
-          fontWeight: 700,
-          letterSpacing: "0.22em",
-          color: "rgba(255, 255, 255, 0.9)",
-          textTransform: "uppercase",
-        }}
-      >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-          <span
-            style={{
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              backgroundColor: "var(--teal, #4FD1C5)",
-              boxShadow: "0 0 10px #4FD1C5",
-              animation: "pulse 1.5s infinite",
-            }}
-          />
-          LOADING
-        </span>
-        <span style={{ color: "var(--teal, #4FD1C5)", textShadow: "0 0 12px rgba(79, 209, 197, 0.5)" }}>
-          {progress}%
-        </span>
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          height: "3px",
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
-          borderRadius: "9999px",
+          fontSize: "10px",
+          color: "var(--teal, #4FD1C5)",
+          letterSpacing: "0.06em",
+          whiteSpace: "nowrap",
           overflow: "hidden",
-          position: "relative",
-          boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.5)",
+          textOverflow: "ellipsis",
         }}
       >
-        <div
+        <span
           style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(79, 209, 197, 0.4)",
-            filter: "blur(3px)",
-            transform: `translateX(${progress - 100}%)`,
-            transition: "transform 0.08s linear",
+            display: "inline-block",
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            backgroundColor: "#22c55e",
+            boxShadow: "0 0 8px #22c55e",
+            animation: "pulse 1.8s infinite",
           }}
         />
+        <span>{bootStatus}</span>
+      </div>
+
+      {/* Progress Bar Track with Neon Glow */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "3px",
+          backgroundColor: "rgba(35, 43, 51, 0.7)",
+          borderRadius: "9999px",
+          overflow: "hidden",
+        }}
+      >
         <div
           style={{
             height: "100%",
-            background: "linear-gradient(90deg, #38BDF8 0%, #4FD1C5 50%, #2DD4BF 100%)",
-            boxShadow: "0 0 18px rgba(79, 209, 197, 0.9)",
             width: `${progress}%`,
-            transition: "width 0.08s linear",
+            background: "linear-gradient(90deg, #38BDF8, #4FD1C5)",
+            boxShadow: "0 0 12px rgba(79, 209, 197, 0.9), 0 0 24px rgba(56, 189, 248, 0.5)",
             borderRadius: "9999px",
+            transition: "width 0.12s linear",
           }}
         />
+      </div>
+
+      {/* Counter and Telemetry Badge */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          fontFamily: "var(--mono, monospace)",
+          fontSize: "11px",
+          color: "rgba(148, 163, 184, 0.9)",
+          letterSpacing: "0.08em",
+        }}
+      >
+        <span style={{ fontSize: "10px", color: "rgba(148, 163, 184, 0.65)" }}>
+          NOC CORE v2.6
+        </span>
+        <span style={{ fontWeight: 700, color: "var(--teal, #4FD1C5)" }}>
+          {progress}%
+        </span>
       </div>
     </div>
   );
@@ -560,26 +606,23 @@ export default function Preloader() {
   useEffect(() => {
     let frame;
     let start = null;
-    const duration = 2200; // Smooth 2.2s loading timing
+    const duration = 2300; // 2.3 seconds smooth boot sequence
 
     const animate = (timestamp) => {
       if (!start) start = timestamp;
       const elapsed = timestamp - start;
       const progress = Math.min(elapsed / duration, 1);
-      // Natural cubic ease-out
-      const eased = 1 - Math.pow(1 - progress, 2.8);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * 100));
 
       if (progress < 1) {
         frame = requestAnimationFrame(animate);
       } else {
-        setCount(100);
         setTimeout(() => {
           setIsExiting(true);
-          setTimeout(() => {
-            setIsHidden(true);
-          }, 800); // Allow scale & blur fade out to complete
-        }, 300);
+          setTimeout(() => setIsHidden(true), 650);
+        }, 220);
       }
     };
 
@@ -589,7 +632,7 @@ export default function Preloader() {
 
   const handleSkip = () => {
     setIsExiting(true);
-    setTimeout(() => setIsHidden(true), 400);
+    setTimeout(() => setIsHidden(true), 350);
   };
 
   if (isHidden) return null;
@@ -604,20 +647,20 @@ export default function Preloader() {
         maxWidth: "100vw",
         height: "100%",
         zIndex: 99999,
-        backgroundColor: "#030712",
+        backgroundColor: "#04060A",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        transition: "opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.75s cubic-bezier(0.16, 1, 0.3, 1)",
+        transition: "opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
         opacity: isExiting ? 0 : 1,
-        transform: isExiting ? "scale(1.06)" : "scale(1)",
-        filter: isExiting ? "blur(12px)" : "blur(0px)",
+        transform: isExiting ? "scale(1.05)" : "scale(1)",
+        filter: isExiting ? "blur(10px)" : "blur(0px)",
         pointerEvents: isExiting ? "none" : "auto",
       }}
     >
-      {/* Layer 1: WebGL Electric Plasma Beam Background */}
+      {/* Layer 1: WebGL Fiber Optic Laser Waveguides Background */}
       <div
         style={{
           position: "absolute",
@@ -626,13 +669,13 @@ export default function Preloader() {
           pointerEvents: "none",
         }}
       >
-        <PlasmaShader hue={185} speed={1.3} intensity={1.15} size={1.8} />
+        <FiberOpticShader speed={1.3} intensity={1.2} />
       </div>
 
-      {/* Layer 2: Particle Text Assembly Canvas */}
+      {/* Layer 2: Network Constellation Topology Assembling into Typography */}
       <ParticleText />
 
-      {/* Layer 3: Foreground UI (Loading Bar & Network Engineer Subtitle) */}
+      {/* Layer 3: Foreground UI (NOC Diagnostic Bootloader & Quick Skip) */}
       <div
         style={{
           position: "absolute",
@@ -649,7 +692,7 @@ export default function Preloader() {
           boxSizing: "border-box",
         }}
       >
-        <LoadingProgressBar progress={count} />
+        <NOCBootloaderBar progress={count} />
 
         <div
           style={{
@@ -658,14 +701,14 @@ export default function Preloader() {
             gap: "10px",
             fontFamily: "var(--mono, monospace)",
             fontSize: "11px",
-            letterSpacing: "0.14em",
-            color: "rgba(148, 163, 184, 0.75)",
+            letterSpacing: "0.12em",
+            color: "rgba(148, 163, 184, 0.7)",
             textTransform: "uppercase",
           }}
         >
-          <span>Muhammad Jaffier Al Zufri</span>
+          <span>NOC Operator & Network Engineer</span>
           <span style={{ color: "rgba(79, 209, 197, 0.5)" }}>•</span>
-          <span>NOC & Network Engineer</span>
+          <span>Jakarta, ID</span>
         </div>
 
         {/* Skip button for rapid navigation */}
@@ -673,25 +716,27 @@ export default function Preloader() {
           type="button"
           onClick={handleSkip}
           style={{
-            marginTop: "10px",
+            marginTop: "6px",
             background: "transparent",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
+            border: "1px solid rgba(79, 209, 197, 0.25)",
             borderRadius: "6px",
-            padding: "4px 12px",
+            padding: "5px 14px",
             fontFamily: "var(--mono, monospace)",
-            fontSize: "10px",
-            letterSpacing: "0.16em",
-            color: "rgba(255, 255, 255, 0.4)",
+            fontSize: "10.5px",
+            letterSpacing: "0.14em",
+            color: "rgba(79, 209, 197, 0.75)",
             cursor: "pointer",
             transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = "var(--teal, #4FD1C5)";
-            e.currentTarget.style.color = "var(--teal, #4FD1C5)";
+            e.currentTarget.style.color = "#ffffff";
+            e.currentTarget.style.background = "rgba(79, 209, 197, 0.15)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
-            e.currentTarget.style.color = "rgba(255, 255, 255, 0.4)";
+            e.currentTarget.style.borderColor = "rgba(79, 209, 197, 0.25)";
+            e.currentTarget.style.color = "rgba(79, 209, 197, 0.75)";
+            e.currentTarget.style.background = "transparent";
           }}
         >
           [ LEWATI / SKIP ]
