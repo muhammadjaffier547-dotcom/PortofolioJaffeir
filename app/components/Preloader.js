@@ -386,12 +386,10 @@ function ParticleText() {
 
     const handleResize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = window.innerWidth;
+      const w = Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth);
       const h = window.innerHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
       const ctx = canvas.getContext("2d");
       ctx.scale(dpr, dpr);
       setupParticles(canvas, w, h);
@@ -407,8 +405,8 @@ function ParticleText() {
       }
 
       const ctx = canvas.getContext("2d");
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = canvas.clientWidth || window.innerWidth;
+      const h = canvas.clientHeight || window.innerHeight;
       const particles = particlesRef.current;
 
       ctx.clearRect(0, 0, w, h);
@@ -592,6 +590,9 @@ export default function Preloader() {
       style={{
         position: "fixed",
         inset: 0,
+        width: "100%",
+        maxWidth: "100vw",
+        height: "100%",
         zIndex: 99999,
         backgroundColor: "#030712",
         display: "flex",

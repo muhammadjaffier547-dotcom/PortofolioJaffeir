@@ -40,43 +40,16 @@ export const metadata = {
 };
 
 export const viewport = {
-  width: 1200,
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#0d0e15",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="id">
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-(function() {
-  try {
-    function setDesktopViewport() {
-      var sw = Math.min(window.screen.width, window.screen.height) || window.innerWidth;
-      if (sw < 1200) {
-        var scale = sw / 1200;
-        var meta = document.querySelector('meta[name="viewport"]');
-        if (!meta) {
-          meta = document.createElement('meta');
-          meta.name = 'viewport';
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute('content', 'width=1200, initial-scale=' + scale.toFixed(3) + ', minimum-scale=0.1, maximum-scale=3.0, user-scalable=yes');
-      }
-    }
-    setDesktopViewport();
-    window.addEventListener('orientationchange', function() {
-      setTimeout(setDesktopViewport, 150);
-    });
-  } catch(e) {}
-})();
-`,
-          }}
-        />
-      </head>
       <body>{children}</body>
     </html>
   );
 }
+

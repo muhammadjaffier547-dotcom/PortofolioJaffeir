@@ -242,12 +242,13 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       }
       const absU = Math.abs(u);
 
-      // Hide distant cards beyond 3.5 steps to prevent horizontal overflow
-      if (absU > 3.6) {
-        card.style.visibility = "hidden";
+      // Completely remove distant cards beyond 2.8 steps from DOM layout to eliminate any overflow
+      if (absU > 2.8) {
+        card.style.display = "none";
         card.style.pointerEvents = "none";
         return;
       }
+      card.style.display = "block";
       card.style.visibility = "visible";
       card.style.pointerEvents = "auto";
 
