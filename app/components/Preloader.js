@@ -187,14 +187,14 @@ class NetworkNodeParticle {
     this.vel = { x: 0, y: 0 };
     this.acc = { x: 0, y: 0 };
     this.target = { x: 0, y: 0 };
-    this.closeEnoughTarget = 85;
-    this.maxSpeed = 11;
-    this.maxForce = 0.85;
+    this.closeEnoughTarget = 40;
+    this.maxSpeed = 13;
+    this.maxForce = 1.15;
     this.particleSize = 2.4;
     this.startColor = { r: 15, g: 23, b: 42 };
     this.targetColor = { r: 255, g: 255, b: 255 };
     this.colorWeight = 0;
-    this.colorBlendRate = 0.025;
+    this.colorBlendRate = 0.04;
   }
 
   move(pointer) {
@@ -297,42 +297,92 @@ function ParticleText() {
     const isSmall = w < 480;
     const isMedium = w < 768;
 
-    // Guaranteed safely within viewport with generous safety margins
-    const maxFontForWidth = Math.floor((w * (isSmall ? 0.74 : isMedium ? 0.78 : 0.82)) / 12);
-    const maxFontForHeight = Math.floor(h * 0.065);
-    const fontBottom = Math.max(14, Math.min(38, Math.min(maxFontForWidth, maxFontForHeight)));
-    const fontTop = Math.max(16, Math.min(46, Math.round(fontBottom * 1.15)));
-    const fontBadge = Math.max(8.5, Math.min(11, Math.round(fontBottom * 0.28)));
+    // Mathematical fitFont helper: dynamically reduces font size until text fits safely inside target width
+    const fitFont = (ctx, text, maxAllowedWidth, startFont, minFont, fontSpec) => {
+      let size = startFont;
+      while (size > minFont) {
+        ctx.font = fontSpec(size);
+        if (ctx.measureText(text).width <= maxAllowedWidth) {
+          return size;
+        }
+        size -= 1;
+      }
+      return minFont;
+    };
 
-    const topY = textCenterY - Math.round(fontTop * 0.65);
-    const bottomY = textCenterY + Math.round(fontBottom * 0.65);
-    const badgeY = bottomY + Math.round(fontBottom * 0.72) + 12;
+    const targetWidth = Math.floor(w * (isSmall ? 0.82 : isMedium ? 0.84 : 0.86));
+    const maxHeightFont = Math.floor(h * 0.075);
 
-    // Line 1: "MUHAMMAD JAFFIER" (Titanium White with soft Ice-Teal gradient)
-    octx.font = `bold ${fontTop}px 'Space Grotesk', system-ui, -apple-system, sans-serif`;
+    // Bottom text: "Portofolio Website" (Vibrant optical laser gradient)
+    const textBottom = "Portofolio Website";
+    const baseFontBottom = isSmall ? 32 : isMedium ? 44 : 54;
+    const fontBottom = Math.min(
+      maxHeightFont,
+      fitFont(
+        octx,
+        textBottom,
+        targetWidth,
+        baseFontBottom,
+        16,
+        (s) => `800 ${s}px 'Inter', system-ui, -apple-system, sans-serif`
+      )
+    );
+
+    // Top text: "Welcome To My"
+    const textTop = "Welcome To My";
+    const baseFontTop = Math.round(fontBottom * 0.74);
+    const fontTop = Math.min(
+      Math.floor(h * 0.055),
+      fitFont(
+        octx,
+        textTop,
+        targetWidth,
+        baseFontTop,
+        14,
+        (s) => `bold ${s}px 'Inter', system-ui, -apple-system, sans-serif`
+      )
+    );
+
+    // Sub-badge: "MUHAMMAD JAFFIER · NETWORK ENGINEER & NOC"
+    const textBadge = isSmall
+      ? "[ MUHAMMAD JAFFIER · NOC & NETWORKING ]"
+      : "[ MUHAMMAD JAFFIER · NETWORK ENGINEER & NOC ]";
+    const baseFontBadge = Math.max(9, Math.min(12, Math.round(fontBottom * 0.28)));
+    const fontBadge = fitFont(
+      octx,
+      textBadge,
+      targetWidth,
+      baseFontBadge,
+      8,
+      (s) => `600 ${s}px 'JetBrains Mono', monospace`
+    );
+
+    const topY = textCenterY - Math.round(fontTop * 0.72);
+    const bottomY = textCenterY + Math.round(fontBottom * 0.72);
+    const badgeY = bottomY + Math.round(fontBottom * 0.75) + 12;
+
+    // Line 1: "Welcome To My" (Titanium White with soft Ice-Teal gradient)
+    octx.font = `bold ${fontTop}px 'Inter', system-ui, -apple-system, sans-serif`;
     const gradTop = octx.createLinearGradient(w / 2 - 180, 0, w / 2 + 180, 0);
     gradTop.addColorStop(0, "#FFFFFF");
-    gradTop.addColorStop(0.5, "#F0FDFA");
+    gradTop.addColorStop(0.5, "#E2E8F0");
     gradTop.addColorStop(1, "#A7F3D0");
     octx.fillStyle = gradTop;
-    octx.fillText("MUHAMMAD JAFFIER", Math.round(w / 2), topY);
+    octx.fillText(textTop, Math.round(w / 2), topY);
 
-    // Line 2: "NETWORK SYSTEMS & NOC" (Vibrant Optical Cyan/Teal Laser Gradient)
-    octx.font = `800 ${fontBottom}px 'Space Grotesk', system-ui, -apple-system, sans-serif`;
-    const gradBottom = octx.createLinearGradient(w / 2 - 200, 0, w / 2 + 200, 0);
+    // Line 2: "Portofolio Website" (Vibrant Optical Cyan/Teal Laser Gradient)
+    octx.font = `800 ${fontBottom}px 'Inter', system-ui, -apple-system, sans-serif`;
+    const gradBottom = octx.createLinearGradient(w / 2 - 220, 0, w / 2 + 220, 0);
     gradBottom.addColorStop(0, "#38BDF8");
     gradBottom.addColorStop(0.5, "#4FD1C5");
     gradBottom.addColorStop(1, "#2DD4BF");
     octx.fillStyle = gradBottom;
-    octx.fillText("NETWORK SYSTEMS & NOC", Math.round(w / 2), bottomY);
+    octx.fillText(textBottom, Math.round(w / 2), bottomY);
 
     // Line 3: Professional Technical Sub-badge
     octx.font = `600 ${fontBadge}px 'JetBrains Mono', monospace`;
-    octx.fillStyle = "rgba(148, 163, 184, 0.85)";
-    const badgeText = isSmall
-      ? "[ AS23700 · MIKROTIK · 10G FIBER ]"
-      : "[ AS23700 · MIKROTIK CCR2004 · 10G OPTICAL FIBER ]";
-    octx.fillText(badgeText, Math.round(w / 2), badgeY);
+    octx.fillStyle = "rgba(148, 163, 184, 0.9)";
+    octx.fillText(textBadge, Math.round(w / 2), badgeY);
 
     const imgData = octx.getImageData(0, 0, w, h).data;
     const particles = particlesRef.current;
@@ -352,7 +402,8 @@ function ParticleText() {
       [coords[i], coords[j]] = [coords[j], coords[i]];
     }
 
-    const radius = (w + h) / 1.8;
+    // Spawn radius kept closer so particles assemble in under 0.6s without looking cut off
+    const radius = Math.min(w, h) * 0.48;
     for (const c of coords) {
       const tx = (c / 4) % w;
       const ty = Math.floor(c / 4 / w);
@@ -363,10 +414,10 @@ function ParticleText() {
       p.pos.y = origin.y;
       p.target.x = tx;
       p.target.y = ty;
-      p.maxSpeed = Math.random() * 7 + 8;
-      p.maxForce = p.maxSpeed * 0.11;
+      p.maxSpeed = Math.random() * 8 + 10;
+      p.maxForce = p.maxSpeed * 0.14;
       p.particleSize = Math.random() * 1.4 + 2.0;
-      p.colorBlendRate = Math.random() * 0.025 + 0.015;
+      p.colorBlendRate = Math.random() * 0.03 + 0.02;
 
       p.startColor = {
         r: Math.floor(Math.random() * 30 + 15),
@@ -429,10 +480,10 @@ function ParticleText() {
       ctx.clearRect(0, 0, w, h);
       frameCountRef.current++;
 
-      // After frame 75, gradually fade into crisp typography
+      // Gradually fade into solid, crisp typography early (starts frame 26, solid by frame 48)
       let crispBlend = 0;
-      if (frameCountRef.current > 75) {
-        crispBlend = Math.min(1, (frameCountRef.current - 75) / 45);
+      if (frameCountRef.current > 26) {
+        crispBlend = Math.min(1, (frameCountRef.current - 26) / 22);
       }
 
       // Live Constellation Mesh: Draw faint fiber interconnect lines during swarm convergence
@@ -521,40 +572,42 @@ function NOCBootloaderBar({ progress }) {
   return (
     <div
       style={{
-        width: "min(340px, 86vw)",
+        width: "min(320px, 86vw)",
         margin: "0 auto",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
       }}
     >
-      {/* Live NOC Terminal Milestone */}
+      {/* Top Header: "Loading" and Percentage Counter */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "8px",
+          justifyContent: "space-between",
           fontFamily: "var(--mono, monospace)",
-          fontSize: "10px",
-          color: "var(--teal, #4FD1C5)",
-          letterSpacing: "0.06em",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
+          fontSize: "11.5px",
+          color: "#fff",
+          letterSpacing: "0.12em",
+          fontWeight: 700,
         }}
       >
-        <span
-          style={{
-            display: "inline-block",
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            backgroundColor: "#22c55e",
-            boxShadow: "0 0 8px #22c55e",
-            animation: "pulse 1.8s infinite",
-          }}
-        />
-        <span>{bootStatus}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--teal, #4FD1C5)" }}>
+          <span
+            style={{
+              display: "inline-block",
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              backgroundColor: "#22c55e",
+              boxShadow: "0 0 8px #22c55e",
+            }}
+          />
+          LOADING
+        </span>
+        <span style={{ color: "var(--teal, #4FD1C5)", fontWeight: 800 }}>
+          {progress}%
+        </span>
       </div>
 
       {/* Progress Bar Track with Neon Glow */}
@@ -563,40 +616,53 @@ function NOCBootloaderBar({ progress }) {
           position: "relative",
           width: "100%",
           height: "3px",
-          backgroundColor: "rgba(35, 43, 51, 0.7)",
+          backgroundColor: "rgba(255, 255, 255, 0.12)",
           borderRadius: "9999px",
           overflow: "hidden",
         }}
       >
         <div
           style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            background: "rgba(255, 255, 255, 0.45)",
+            filter: "blur(2px)",
+            transform: `translateX(${progress - 100}%)`,
+            transition: "transform 0.12s linear",
+          }}
+        />
+        <div
+          style={{
             height: "100%",
             width: `${progress}%`,
-            background: "linear-gradient(90deg, #38BDF8, #4FD1C5)",
-            boxShadow: "0 0 12px rgba(79, 209, 197, 0.9), 0 0 24px rgba(56, 189, 248, 0.5)",
+            background: "linear-gradient(90deg, #38BDF8, #4FD1C5, #ffffff)",
+            boxShadow: "0 0 14px rgba(79, 209, 197, 0.9), 0 0 28px rgba(56, 189, 248, 0.6)",
             borderRadius: "9999px",
             transition: "width 0.12s linear",
           }}
         />
       </div>
 
-      {/* Counter and Telemetry Badge */}
+      {/* Live NOC Terminal Milestone */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           fontFamily: "var(--mono, monospace)",
-          fontSize: "11px",
-          color: "rgba(148, 163, 184, 0.9)",
-          letterSpacing: "0.08em",
+          fontSize: "9.5px",
+          color: "rgba(148, 163, 184, 0.8)",
+          letterSpacing: "0.05em",
         }}
       >
-        <span style={{ fontSize: "10px", color: "rgba(148, 163, 184, 0.65)" }}>
-          NOC CORE v2.6
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {bootStatus}
         </span>
-        <span style={{ fontWeight: 700, color: "var(--teal, #4FD1C5)" }}>
-          {progress}%
+        <span style={{ fontSize: "9px", color: "rgba(79, 209, 197, 0.65)", flexShrink: 0, marginLeft: "8px" }}>
+          AS23700
         </span>
       </div>
     </div>
@@ -611,7 +677,7 @@ export default function Preloader() {
   useEffect(() => {
     let frame;
     let start = null;
-    const duration = 2300; // 2.3 seconds smooth boot sequence
+    const duration = 2500; // 2.5s complete sequence
 
     const animate = (timestamp) => {
       if (!start) start = timestamp;
@@ -651,6 +717,7 @@ export default function Preloader() {
         width: "100%",
         maxWidth: "100vw",
         height: "100%",
+        height: "100dvh",
         zIndex: 99999,
         backgroundColor: "#04060A",
         display: "flex",
@@ -658,6 +725,7 @@ export default function Preloader() {
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        touchAction: "none",
         transition: "opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
         opacity: isExiting ? 0 : 1,
         transform: isExiting ? "scale(1.05)" : "scale(1)",
@@ -703,17 +771,21 @@ export default function Preloader() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            justifyContent: "center",
+            gap: "8px",
             fontFamily: "var(--mono, monospace)",
-            fontSize: "11px",
-            letterSpacing: "0.12em",
-            color: "rgba(148, 163, 184, 0.7)",
+            fontSize: "clamp(10px, 2.8vw, 11px)",
+            letterSpacing: "0.1em",
+            color: "rgba(255, 255, 255, 0.75)",
             textTransform: "uppercase",
+            textAlign: "center",
+            flexWrap: "wrap",
+            width: "100%",
           }}
         >
-          <span>NOC Operator & Network Engineer</span>
-          <span style={{ color: "rgba(79, 209, 197, 0.5)" }}>•</span>
-          <span>Jakarta, ID</span>
+          <span>Muhammad Jaffier Al Zufri</span>
+          <span style={{ color: "rgba(79, 209, 197, 0.6)" }}>•</span>
+          <span>Network Engineer &amp; NOC</span>
         </div>
 
         {/* Skip button for rapid navigation */}
