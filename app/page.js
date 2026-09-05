@@ -6,6 +6,7 @@ import About from "./components/About";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
 import TopologyMap from "./components/TopologyMap";
+import SubmarineCableMap from "./components/SubmarineCableMap";
 import Gallery from "./components/Gallery";
 import NetworkTools from "./components/NetworkTools";
 import Skills from "./components/Skills";
@@ -43,6 +44,7 @@ export default function Home() {
         <ScrollReveal><Experience /></ScrollReveal>
         <ScrollReveal><Projects /></ScrollReveal>
         <ScrollReveal><TopologyMap /></ScrollReveal>
+        <ScrollReveal><SubmarineCableMap /></ScrollReveal>
         <ScrollReveal><IncidentSimulator /></ScrollReveal>
         <ScrollReveal><Gallery /></ScrollReveal>
         <ScrollReveal><NetworkTools /></ScrollReveal>

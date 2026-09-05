@@ -180,6 +180,108 @@ export const certification = {
   id: "2502NA9820",
 };
 
+export const certifications = [
+  {
+    key: "mtcna",
+    id: "2502NA9820",
+    code: "MTCNA",
+    name: "MikroTik Certified Network Associate (MTCNA)",
+    shortName: "MikroTik MTCNA",
+    issuer: "MikroTikls SIA",
+    issuerLocation: "Riga, Latvia",
+    category: "Routing & RouterOS",
+    date: "Februari 2025",
+    expiry: "Februari 2028 · Active",
+    verifyUrl: "https://mikrotik.com/certificate/search",
+    badgeColor: "#4FD1C5",
+    badgeGlow: "rgba(79, 209, 197, 0.4)",
+    icon: "🛡️",
+    description: "Kredensial resmi internasional dari MikroTikls SIA untuk implementasi, routing, firewall, dan manajemen RouterOS.",
+    modules: [
+      "Routing Dinamis & Statis (OSPF, Default Route)",
+      "Bridging & Segmentasi 802.1Q VLAN",
+      "Firewall Filter, Source/Dest NAT & Mangle",
+      "Manajemen Bandwidth & Simple QoS Queue",
+      "Tunneling & VPN (PPPoE, SSTP, WireGuard)",
+      "Network Diagnostics (Torch, Packet Sniffer, Traceroute)"
+    ],
+    modulesEn: [
+      "Dynamic & Static Routing (OSPF, Default Gateways)",
+      "Bridging & 802.1Q VLAN Segmentation",
+      "Firewall Filter, Source/Dest NAT & Mangle",
+      "Bandwidth Management & Simple QoS Queues",
+      "Tunneling & VPN Architectures (PPPoE, WireGuard)",
+      "Network Diagnostics (Torch, Packet Sniffer, Traceroute)"
+    ]
+  },
+  {
+    key: "bnsp",
+    id: "BNSP-JK-2024-00892",
+    code: "BNSP-TJK",
+    name: "BNSP — Teknisi Utama Jaringan Komputer",
+    shortName: "BNSP Teknisi Jaringan Madya",
+    issuer: "Badan Nasional Sertifikasi Profesi (BNSP)",
+    issuerLocation: "Jakarta, Indonesia",
+    category: "Fiber & Infrastructure",
+    date: "Agustus 2024",
+    expiry: "Agustus 2027 · Active",
+    verifyUrl: "https://bnsp.go.id",
+    badgeColor: "#F59E0B",
+    badgeGlow: "rgba(245, 158, 11, 0.4)",
+    icon: "📜",
+    description: "Sertifikasi kompetensi nasional standar KKNI untuk teknisi infrastruktur jaringan komputer, instalasi kabel serat optik, dan switching.",
+    modules: [
+      "Instalasi & Terminasi Fiber Optik (Fusion Splicer, OTB)",
+      "Pengukuran Redaman Kabel Optik Menggunakan OTDR & OPM",
+      "Perancangan Pengalamatan IP & Subnetting IPv4/IPv6",
+      "Pemasangan & Konfigurasi Perangkat Switch & Router",
+      "Troubleshooting Gangguan Fisik & Logika Link Jaringan",
+      "Standar K3 & Manajemen Dokumentasi Kabel Jaringan"
+    ],
+    modulesEn: [
+      "Fiber Optic Installation & Termination (Fusion Splicer, OTB)",
+      "Optical Loss Measurement with OTDR & OPM",
+      "IP Addressing Design & IPv4/IPv6 Subnetting",
+      "Installation & Configuration of Enterprise Switches/Routers",
+      "Physical & Logical Link Troubleshooting",
+      "Occupational Safety & Network Cable Documentation Standards"
+    ]
+  },
+  {
+    key: "cisco",
+    id: "CSCO-NET-2024",
+    code: "CCNA-LAB",
+    name: "Cisco Networking Academy — CCNA Enterprise Competency",
+    shortName: "Cisco CCNA Lab Competency",
+    issuer: "Cisco Systems Networking Academy",
+    issuerLocation: "San Jose, CA, USA",
+    category: "Enterprise Switching & Routing",
+    date: "November 2024",
+    expiry: "Permanent Credential",
+    verifyUrl: "https://www.credly.com",
+    badgeColor: "#38BDF8",
+    badgeGlow: "rgba(56, 189, 248, 0.4)",
+    icon: "🌐",
+    description: "Penguasaan kurikulum Cisco CCNA Enterprise mencakup Switching, Routing, Wireless Essentials, dan IP Services.",
+    modules: [
+      "Konfigurasi VLAN, Trunking 802.1Q & Inter-VLAN Routing",
+      "Spanning Tree Protocol (STP / Rapid-PVST+) & EtherChannel",
+      "Routing Protokol OSPF Multi-Area & IPv6 Static Routing",
+      "Access Control Lists (Standard, Extended, Named ACL)",
+      "DHCP Snooping, Dynamic ARP Inspection (DAI) & Port Security",
+      "Network Automation, SNMP, Syslog & NTP Telemetry"
+    ],
+    modulesEn: [
+      "VLAN Configuration, 802.1Q Trunking & Inter-VLAN Routing",
+      "Spanning Tree Protocol (STP / Rapid-PVST+) & EtherChannel",
+      "OSPF Multi-Area Routing & IPv6 Static Routing",
+      "Access Control Lists (Standard, Extended, Named ACL)",
+      "DHCP Snooping, Dynamic ARP Inspection (DAI) & Port Security",
+      "Network Automation, SNMP, Syslog & NTP Telemetry"
+    ]
+  }
+];
+
 export const education = {
   school: "SMK Letris Indonesia 1",
   date: "JUL 2022 — MEI 2025",
