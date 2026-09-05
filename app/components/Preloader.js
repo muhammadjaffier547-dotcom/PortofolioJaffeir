@@ -310,7 +310,7 @@ function ParticleText() {
       return minFont;
     };
 
-    const targetWidth = Math.floor(w * (isSmall ? 0.82 : isMedium ? 0.84 : 0.86));
+    const targetWidth = Math.floor(w * (w < 380 ? 0.76 : isSmall ? 0.80 : isMedium ? 0.83 : 0.86));
     const maxHeightFont = Math.floor(h * 0.075);
 
     // Bottom text: "Portofolio Website" (Vibrant optical laser gradient)
@@ -449,6 +449,11 @@ function ParticleText() {
     };
 
     handleResize();
+    if (typeof document !== "undefined" && document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        if (canvas) handleResize();
+      });
+    }
 
     const handlePointerMove = (e) => {
       const rect = canvas.getBoundingClientRect();

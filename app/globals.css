@@ -3599,7 +3599,8 @@ section + section::before{
 .otdr-title-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .otdr-badge {
   font-family: var(--mono);
@@ -4868,7 +4869,26 @@ section + section::before{
     padding: 56px 0;
   }
   .hero {
-    padding: 36px 0 24px;
+    padding: 32px 0 24px;
+  }
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .badge {
+    max-width: 320px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 18px;
+    box-sizing: border-box;
+  }
+  .badge-photo {
+    width: 100%;
+    aspect-ratio: 3 / 3.4;
+    max-height: 290px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    overflow: hidden;
   }
   .hero-cta {
     margin-bottom: 32px;

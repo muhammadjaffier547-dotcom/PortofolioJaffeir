@@ -97,8 +97,8 @@ export default function Hero() {
                 src="/photo.jpg"
                 alt="Foto Muhammad Jaffier Al Zufri"
                 fill
-                sizes="280px"
-                style={{ objectFit: "cover", objectPosition: "center 22%" }}
+                sizes="(max-width: 820px) 320px, 280px"
+                style={{ objectFit: "cover", objectPosition: "67% 28%" }}
                 priority
               />
               <div className="scan" />
