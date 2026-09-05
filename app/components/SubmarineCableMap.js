@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../context/LanguageContext";
 
 const STATIONS = [
@@ -229,6 +229,7 @@ export default function SubmarineCableMap() {
   const [isPinging, setIsPinging] = useState(false);
   const [pingLog, setPingLog] = useState(null);
   const [jitter, setJitter] = useState(0);
+  const mapContainerRef = useRef(null);
 
   // Subtle telemetry jitter simulation
   useEffect(() => {
@@ -242,6 +243,14 @@ export default function SubmarineCableMap() {
     setActiveStation(stn);
     const related = CABLES.find((c) => c.to === stn.id || c.from === stn.id);
     if (related) setActiveCable(related);
+
+    // Smooth pan on mobile to center the clicked station
+    if (mapContainerRef.current && typeof window !== "undefined" && window.innerWidth < 768) {
+      const container = mapContainerRef.current;
+      const mapW = Math.max(640, container.scrollWidth);
+      const targetScroll = (stn.x / 1000) * mapW - (container.clientWidth / 2);
+      container.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" });
+    }
   };
 
   const handleCableClick = (cbl) => {
@@ -350,7 +359,7 @@ export default function SubmarineCableMap() {
           </div>
 
           {/* Interactive SVG World/Asia-Pacific Optical Topology Map */}
-          <div className="subsea-svg-container">
+          <div ref={mapContainerRef} className="subsea-svg-container">
             <svg
               viewBox="0 0 1000 520"
               className="subsea-svg"

@@ -230,7 +230,11 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     const cardWidth = cardWidthRef.current || 300;
     if (total === 0) return;
 
-    const spacing = cardWidth * (1 + gap);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const isSmallMobile = typeof window !== "undefined" && window.innerWidth < 480;
+
+    // Mobile coverflow spacing: compact so flanking cards tuck neatly inside screen without being sliced
+    const spacing = cardWidth * (isSmallMobile ? 0.38 : isMobile ? 0.44 : 0.88);
     const activePos = currentPosRef.current;
 
     cardsRef.current.forEach((card, idx) => {
@@ -242,8 +246,9 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       }
       const absU = Math.abs(u);
 
-      // Completely remove distant cards beyond 2.8 steps from DOM layout to eliminate any overflow
-      if (absU > 2.8) {
+      // Completely remove distant cards beyond view range from DOM layout
+      const maxRange = isMobile ? 2.2 : 2.8;
+      if (absU > maxRange) {
         card.style.display = "none";
         card.style.pointerEvents = "none";
         return;
@@ -253,8 +258,9 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
       card.style.pointerEvents = "auto";
 
       const d = Math.pow(absU, falloff);
-      const rotation = Math.min(rotate * d, 82) * Math.sign(u);
-      const zDepth = -depth * cardWidth * d;
+      const maxRot = isMobile ? 46 : 72;
+      const rotation = Math.min(rotate * d, maxRot) * Math.sign(u);
+      const zDepth = -(isMobile ? depth * 0.85 : depth) * cardWidth * d;
       const xOffset = u * spacing;
 
       card.style.transform = `translateX(calc(-50% + ${xOffset}px)) translateZ(${zDepth}px) rotateY(${-rotation}deg)`;
@@ -302,6 +308,18 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
   const goNext = () => {
     const currentTarget = Math.round(targetPosRef.current);
     glideTo(currentTarget + 1);
+    resetAutoplay();
+  };
+
+  const goToIndex = (targetIdx) => {
+    const currentRound = Math.round(currentPosRef.current);
+    const currentMod = ((currentRound % total) + total) % total;
+    let delta = targetIdx - currentMod;
+    if (loop) {
+      if (delta > total / 2) delta -= total;
+      else if (delta < -total / 2) delta += total;
+    }
+    glideTo(currentRound + delta);
     resetAutoplay();
   };
 
@@ -460,7 +478,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         cardWidthRef.current = first.offsetWidth;
       } else {
         const sw = window.innerWidth;
-        cardWidthRef.current = Math.min(340, Math.max(240, sw * 0.28));
+        cardWidthRef.current = sw < 480 ? Math.min(240, sw * 0.65) : sw < 768 ? Math.min(260, sw * 0.64) : Math.min(340, Math.max(240, sw * 0.28));
       }
       updateTransforms();
     };
@@ -484,7 +502,7 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
     <div
       className="coverflow-wrapper"
       style={{
-        "--cf-card": "clamp(240px, 28vw, 350px)",
+        "--cf-card": "clamp(220px, 28vw, 340px)",
       }}
     >
       {/* Relative container holding stage and floating sibling buttons */}
@@ -562,6 +580,19 @@ function CoverFlowCarousel({ items, onSelectPhoto, isId }) {
         >
           ›
         </button>
+      </div>
+
+      {/* Interactive Dot Indicator Pagination for Mobile and Quick Direct Navigation */}
+      <div className="coverflow-dots-bar" role="tablist" aria-label="Coverflow pagination">
+        {items.map((it, i) => (
+          <button
+            key={it.id}
+            type="button"
+            className={`coverflow-dot ${normalizeIndex(activeIndex) === i ? "is-active" : ""}`}
+            onClick={() => goToIndex(i)}
+            aria-label={`Lihat foto ${i + 1}`}
+          />
+        ))}
       </div>
 
       {/* Active Slide Telemetry Inspector Banner */}

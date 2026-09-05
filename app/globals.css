@@ -1813,7 +1813,6 @@ section + section::before{
   margin-bottom:28px;
   overflow:hidden;
   isolation:isolate;
-  clip-path:inset(0 0 0 0);
 }
 .coverflow-stage{
   position:relative;
@@ -1831,6 +1830,8 @@ section + section::before{
   display:flex;
   justify-content:center;
   align-items:center;
+  mask-image:linear-gradient(90deg, transparent 0%, #000 3.5%, #000 96.5%, transparent 100%);
+  -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 3.5%, #000 96.5%, transparent 100%);
 }
 .coverflow-stage:active{
   cursor:grabbing;
@@ -2048,16 +2049,99 @@ section + section::before{
   transform:translateY(-2px);
 }
 
+.coverflow-dots-bar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin:12px 0 6px;
+  flex-wrap:wrap;
+  width:100%;
+}
+.coverflow-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.18);
+  border:none;
+  padding:0;
+  cursor:pointer;
+  transition:all .22s ease;
+}
+.coverflow-dot:hover{
+  background:rgba(79,209,197,0.5);
+  transform:scale(1.2);
+}
+.coverflow-dot.is-active{
+  width:22px;
+  border-radius:11px;
+  background:var(--teal);
+  box-shadow:0 0 10px rgba(79,209,197,0.6);
+}
+
 @media(max-width:768px){
-  .coverflow-stage{padding:20px 0 35px;min-height:350px;}
-  .coverflow-track{height:280px;}
-  .coverflow-card{width:260px;height:280px;}
-  .coverflow-nav-btn{width:36px;height:36px;font-size:20px;}
-  .coverflow-prev{left:6px;}
-  .coverflow-next{right:6px;}
-  .coverflow-active-telemetry{flex-direction:column;align-items:flex-start;padding:16px;}
+  .coverflow-stage{
+    padding:14px 0 24px;
+    min-height:300px;
+    mask-image:linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
+  }
+  .coverflow-track{height:250px;}
+  .coverflow-card{
+    width:clamp(210px, 65vw, 260px);
+    height:250px;
+    border-radius:14px;
+  }
+  .coverflow-nav-btn{
+    width:34px;
+    height:34px;
+    font-size:19px;
+    background:rgba(12,17,23,0.85);
+  }
+  .coverflow-prev{left:2px;}
+  .coverflow-next{right:2px;}
+  .coverflow-active-telemetry{
+    flex-direction:column;
+    align-items:flex-start;
+    padding:16px;
+    margin-top:10px;
+  }
   .coverflow-active-actions{width:100%;}
   .coverflow-inspect-btn{width:100%;text-align:center;}
+}
+
+@media(max-width:480px){
+  .coverflow-stage{
+    padding:10px 0 20px;
+    min-height:280px;
+  }
+  .coverflow-track{height:235px;}
+  .coverflow-card{
+    width:clamp(195px, 63vw, 240px);
+    height:235px;
+    border-radius:12px;
+  }
+  .coverflow-card-glass{
+    padding:12px 14px;
+  }
+  .coverflow-card-title{
+    font-size:12px;
+  }
+  .coverflow-pill{
+    font-size:8.5px;
+    padding:2px 6px;
+  }
+  .coverflow-dots-bar{
+    gap:5px;
+    margin:8px 0 4px;
+  }
+  .coverflow-dot{
+    width:6px;
+    height:6px;
+  }
+  .coverflow-dot.is-active{
+    width:16px;
+  }
 }
 
 /* Lightbox Modal */
@@ -5410,9 +5494,20 @@ section + section::before{
     font-size: 9.5px;
   }
   .subsea-svg-container {
-    min-height: 240px;
+    min-height: 280px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  .subsea-svg {
+    min-width: 640px;
+    height: auto;
+  }
+  .subsea-svg-label {
+    font-size: 11px;
+  }
+  .subsea-svg-rtt {
+    font-size: 10px;
   }
   .subsea-telemetry-cockpit {
     padding: 14px 12px;

@@ -294,13 +294,15 @@ function ParticleText() {
     // Text center placed comfortably in upper-middle area (around 38% from top)
     const textCenterY = Math.round(h * 0.38);
 
-    // Responsive font calculation tailored to "MUHAMMAD JAFFIER" & "NETWORK SYSTEMS & NOC"
-    // "NETWORK SYSTEMS & NOC" (21 chars * ~0.55 = 11.5 * fontSize) guaranteed inside 82% width
-    const maxFontForWidth = Math.floor((w * 0.82) / 11.5);
-    const maxFontForHeight = Math.floor(h * 0.072);
-    const fontBottom = Math.max(16, Math.min(42, Math.min(maxFontForWidth, maxFontForHeight)));
-    const fontTop = Math.max(18, Math.min(52, Math.round(fontBottom * 1.18)));
-    const fontBadge = Math.max(9, Math.min(12, Math.round(fontBottom * 0.28)));
+    const isSmall = w < 480;
+    const isMedium = w < 768;
+
+    // Guaranteed safely within viewport with generous safety margins
+    const maxFontForWidth = Math.floor((w * (isSmall ? 0.74 : isMedium ? 0.78 : 0.82)) / 12);
+    const maxFontForHeight = Math.floor(h * 0.065);
+    const fontBottom = Math.max(14, Math.min(38, Math.min(maxFontForWidth, maxFontForHeight)));
+    const fontTop = Math.max(16, Math.min(46, Math.round(fontBottom * 1.15)));
+    const fontBadge = Math.max(8.5, Math.min(11, Math.round(fontBottom * 0.28)));
 
     const topY = textCenterY - Math.round(fontTop * 0.65);
     const bottomY = textCenterY + Math.round(fontBottom * 0.65);
@@ -308,7 +310,7 @@ function ParticleText() {
 
     // Line 1: "MUHAMMAD JAFFIER" (Titanium White with soft Ice-Teal gradient)
     octx.font = `bold ${fontTop}px 'Space Grotesk', system-ui, -apple-system, sans-serif`;
-    const gradTop = octx.createLinearGradient(w / 2 - 200, 0, w / 2 + 200, 0);
+    const gradTop = octx.createLinearGradient(w / 2 - 180, 0, w / 2 + 180, 0);
     gradTop.addColorStop(0, "#FFFFFF");
     gradTop.addColorStop(0.5, "#F0FDFA");
     gradTop.addColorStop(1, "#A7F3D0");
@@ -317,7 +319,7 @@ function ParticleText() {
 
     // Line 2: "NETWORK SYSTEMS & NOC" (Vibrant Optical Cyan/Teal Laser Gradient)
     octx.font = `800 ${fontBottom}px 'Space Grotesk', system-ui, -apple-system, sans-serif`;
-    const gradBottom = octx.createLinearGradient(w / 2 - 220, 0, w / 2 + 220, 0);
+    const gradBottom = octx.createLinearGradient(w / 2 - 200, 0, w / 2 + 200, 0);
     gradBottom.addColorStop(0, "#38BDF8");
     gradBottom.addColorStop(0.5, "#4FD1C5");
     gradBottom.addColorStop(1, "#2DD4BF");
@@ -327,7 +329,10 @@ function ParticleText() {
     // Line 3: Professional Technical Sub-badge
     octx.font = `600 ${fontBadge}px 'JetBrains Mono', monospace`;
     octx.fillStyle = "rgba(148, 163, 184, 0.85)";
-    octx.fillText("[ AS23700 · MIKROTIK CCR2004 · 10G OPTICAL FIBER ]", Math.round(w / 2), badgeY);
+    const badgeText = isSmall
+      ? "[ AS23700 · MIKROTIK · 10G FIBER ]"
+      : "[ AS23700 · MIKROTIK CCR2004 · 10G OPTICAL FIBER ]";
+    octx.fillText(badgeText, Math.round(w / 2), badgeY);
 
     const imgData = octx.getImageData(0, 0, w, h).data;
     const particles = particlesRef.current;
