@@ -222,8 +222,10 @@ export default function MusicPlayer() {
     };
   }, []);
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <aside className={`music-player ${isPlaying ? "is-playing" : ""}`}>
+    <aside className={`music-player ${isPlaying ? "is-playing" : ""} ${mobileOpen ? "mobile-expanded" : ""}`}>
       <button
         className="music-button"
         onClick={toggleSound}
@@ -238,6 +240,18 @@ export default function MusicPlayer() {
         </span>
         <span className="music-icon">{isPlaying ? "Ⅱ" : "▶"}</span>
       </button>
+
+      {/* Mobile volume expand toggle button */}
+      {isPlaying && (
+        <button
+          className="music-mobile-toggle"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Tutup kontrol volume" : "Buka kontrol volume"}
+          title="Pengaturan Volume"
+        >
+          {mobileOpen ? "✕" : "⚙"}
+        </button>
+      )}
 
       <div className="music-meta">
         <div className="music-head-row">

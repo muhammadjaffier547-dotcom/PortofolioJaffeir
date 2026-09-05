@@ -328,6 +328,27 @@ export default function SubmarineCableMap() {
             </div>
           </div>
 
+          {/* Quick Landing Station Selector for Touch / Mobile */}
+          <div className="subsea-station-pills">
+            <span className="subsea-pills-label">
+              {isId ? "HUB LANDING CEPAT:" : "QUICK HUB SELECTOR:"}
+            </span>
+            <div className="subsea-pills-scroll">
+              {STATIONS.map((stn) => (
+                <button
+                  key={stn.id}
+                  onClick={() => handleStationClick(stn)}
+                  className={`subsea-pill-btn ${activeStation.id === stn.id ? "active" : ""}`}
+                  aria-label={`Pilih ${stn.name}`}
+                >
+                  <span className="subsea-pill-flag">{stn.country.split(" ")[1]}</span>
+                  <span className="subsea-pill-code">{stn.code}</span>
+                  <span className="subsea-pill-rtt">{(stn.baseRtt + jitter).toFixed(0)}ms</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Interactive SVG World/Asia-Pacific Optical Topology Map */}
           <div className="subsea-svg-container">
             <svg
@@ -459,6 +480,13 @@ export default function SubmarineCableMap() {
                       className={`subsea-station-node ${isSelected ? "is-selected" : ""}`}
                       onClick={() => handleStationClick(station)}
                     >
+                      {/* Invisible Touch Hit Target Area (56px touch zone) */}
+                      <circle
+                        r="28"
+                        fill="transparent"
+                        className="subsea-touch-target"
+                      />
+
                       {/* Ripple Radar Ring */}
                       <circle
                         r={isSelected ? "18" : isJkt ? "14" : "10"}

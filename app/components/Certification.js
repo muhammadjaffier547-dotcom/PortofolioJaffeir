@@ -46,12 +46,47 @@ function HolographicCard({ cert, isId, onSelect }) {
     });
   };
 
+  const handleTouchMove = (e) => {
+    if (!cardRef.current || !e.touches[0]) return;
+    const touch = e.touches[0];
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotX = -((y - centerY) / centerY) * 10;
+    const rotY = ((x - centerX) / centerX) * 10;
+    const glareX = (x / rect.width) * 100;
+    const glareY = (y / rect.height) * 100;
+
+    setTransformStyle({
+      rotX,
+      rotY,
+      glareX,
+      glareY,
+      glareOpacity: 0.85,
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setTransformStyle({
+      rotX: 0,
+      rotY: 0,
+      glareX: 50,
+      glareY: 50,
+      glareOpacity: 0,
+    });
+  };
+
   return (
     <div
       ref={cardRef}
       className="holo-card-wrapper"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       onClick={() => onSelect(cert)}
       role="button"
       tabIndex={0}

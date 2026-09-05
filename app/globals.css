@@ -62,6 +62,9 @@ a{color:inherit;}
   padding:0 28px;
   box-sizing:border-box;
 }
+@media (max-width:640px){
+  .wrap{padding:0 16px;}
+}
 
 /* ---------- status bar ---------- */
 .statusbar{
@@ -639,10 +642,35 @@ h2.sectitle{
 .holo-close-btn:hover{
   color:var(--fog);
 }
+@media (hover: none) {
+  .holo-foil-layer {
+    opacity: 0.45 !important;
+    background-size: 200% 200% !important;
+    animation: mobileHoloSweep 6s ease-in-out infinite alternate !important;
+  }
+  @keyframes mobileHoloSweep {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 50% 100%; }
+  }
+}
 @media(max-width:768px){
-  .holo-cards-grid{grid-template-columns:1fr}
-  .cert-section-head{flex-direction:column; align-items:flex-start}
-  .cert-meta-tag{align-items:flex-start}
+  .holo-cards-grid{grid-template-columns:1fr; gap:16px;}
+  .cert-section-head{flex-direction:column; align-items:flex-start; gap:14px;}
+  .cert-meta-tag{align-items:flex-start;}
+  .holo-card{min-height:260px; padding:20px 16px;}
+  .holo-title{font-size:14px;}
+  .holo-id-bar{padding:6px 10px; flex-wrap:wrap;}
+  .holo-id-val{font-size:10.5px; word-break:break-all;}
+  .holo-modal-dialog{
+    width:calc(100% - 24px);
+    margin:12px auto;
+    padding:18px 14px;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .holo-modal-banner{flex-direction:row; gap:12px;}
+  .holo-modal-badge-img{width:44px; height:44px;}
 }
 
 /* ---------- education ---------- */
@@ -895,7 +923,67 @@ body::before{
   border:none;
   box-shadow:0 0 8px var(--teal);
 }
-@media(max-width:620px){.music-player{right:12px;bottom:12px;padding:7px}.music-meta{display:none}}
+.music-mobile-toggle {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--slate);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.music-mobile-toggle:hover {
+  color: var(--fog);
+  border-color: var(--teal-dim);
+}
+@media(max-width:620px){
+  .music-player{
+    right: 12px;
+    bottom: 12px;
+    padding: 8px;
+    gap: 8px;
+    z-index: 400;
+  }
+  .music-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .music-mobile-toggle {
+    display: flex;
+  }
+  .music-player:not(.mobile-expanded) .music-meta {
+    display: none;
+  }
+  .music-player.mobile-expanded {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px;
+    min-width: 230px;
+    bottom: 16px;
+    right: 12px;
+    background: rgba(10, 13, 16, 0.96);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 24px rgba(79, 209, 197, 0.15);
+  }
+  .music-player.mobile-expanded .music-meta {
+    display: grid;
+    margin-top: 8px;
+  }
+  .music-player.mobile-expanded .music-button {
+    align-self: flex-start;
+  }
+  .music-player.mobile-expanded .music-mobile-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+}
 
 /* RGB status indicator */
 .status-left .dot{
@@ -5216,10 +5304,83 @@ section + section::before{
   color: var(--teal);
   line-height: 1.4;
 }
+/* Subsea Station Quick Pills for Mobile & Touch */
+.subsea-station-pills {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  background: rgba(14, 19, 25, 0.9);
+  border-bottom: 1px solid var(--line);
+}
+.subsea-pills-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--copper);
+  white-space: nowrap;
+  letter-spacing: 0.08em;
+}
+.subsea-pills-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0;
+  width: 100%;
+}
+.subsea-pills-scroll::-webkit-scrollbar {
+  display: none;
+}
+.subsea-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--slate);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.subsea-pill-btn:hover {
+  border-color: rgba(79, 209, 197, 0.4);
+  color: var(--fog);
+}
+.subsea-pill-btn.active {
+  background: rgba(79, 209, 197, 0.15);
+  border-color: var(--teal);
+  color: var(--teal);
+  font-weight: 700;
+}
+.subsea-pill-flag {
+  font-size: 12px;
+}
+.subsea-pill-rtt {
+  font-size: 9.5px;
+  color: var(--teal);
+  background: rgba(79, 209, 197, 0.1);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.subsea-touch-target {
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
+  .subsea-section {
+    padding: 32px 0;
+  }
   .subsea-head {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
   }
   .subsea-filters {
     width: 100%;
@@ -5231,11 +5392,55 @@ section + section::before{
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .subsea-station-pills {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .subsea-hud-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .subsea-hud-right {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 9.5px;
+  }
+  .subsea-svg-container {
+    min-height: 240px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .subsea-telemetry-cockpit {
+    padding: 14px 12px;
+  }
   .subsea-card-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .subsea-detail-card {
+    padding: 14px;
   }
   .subsea-metrics-row {
     grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .subsea-metric {
+    padding: 5px 6px;
+  }
+  .subsea-metric .sm-label {
+    font-size: 7.5px;
+  }
+  .subsea-metric .sm-value {
+    font-size: 9.5px;
+  }
+}
+@media (max-width: 440px) {
+  .subsea-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
